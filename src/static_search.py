@@ -1,0 +1,28 @@
+"""Static search module
+
+Searches on static scraped data.
+"""
+
+import pandas as pd
+
+from config import config
+
+
+def get_search_results(id: str, df: pd.DataFrame) -> pd.Series:
+    """Gets the first N search results (URLs) from the static data and returns them as a Series of URL strings sorted
+    by rank.
+
+    The sorting is from higher to lower rank (rank 1 is the highest), example (let 'urls' be the resulting list):
+    - urls[0] = rank 1
+    - urls[1] = rank 2
+    - urls[2] = rank 3
+    - etc.
+
+    Note:
+    - N = config.TRUNCATED_RANKING_RESULTS
+    """
+    df = df[df.id == id]
+    df = df.sort_values('rank')
+    df = df['url']
+    df = df.iloc[0:config.TRUNCATED_RANKING_RESULTS]
+    return df
