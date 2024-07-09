@@ -21,7 +21,7 @@ def get_search_results(id: str, df: pd.DataFrame) -> pd.Series:
     Note:
     - N = config.TRUNCATED_RANKING_RESULTS
     """
-    df = df[df.id == id]
+    df = df[df.index == id]
     df = df.sort_values('rank')
     df = df['url']
     df = df.iloc[0:config.TRUNCATED_RANKING_RESULTS]

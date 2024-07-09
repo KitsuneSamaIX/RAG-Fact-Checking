@@ -6,19 +6,35 @@ Executes tests and produces statistics.
 import pandas as pd
 
 from static_search import get_search_results
+from fact import Fact
+from rag_chain import fact_check
+from config import config
 
 
-def run_test(df: pd.DataFrame):
-    unique_ids = df['id'].drop_duplicates()
+def run_test_suite(df: pd.DataFrame):
+    ids = df.index.to_series()
+    unique_ids = ids.drop_duplicates()
+
     for id in unique_ids:
+        id_data = _get_fact_and_target(id, df)
         rs = get_search_results(id, df)
-        # TODO..... invoke RAG chain HERE to get results
+        fact_check(id_data[0], rs)
+
+        print(f"\nTHE TARGET IS: {_target_to_bool(id_data[1])}\n")
 
 
-def _get_target(id: str, df: pd.DataFrame) -> int:
-    """Gets the target values of the passed id.
+def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:
+    """Gets the fact and the target value of the passed id.
     """
-    return df[df.id == id]['target'].iat[0]
+    single_row = df.loc[df.index == id, ['speaker', 'text', 'target']].iloc[0]
+
+    fact = Fact(
+        speaker=single_row['speaker'],
+        text=single_row['text']
+    )
+    target = single_row['target']
+
+    return fact, target
 
 
 def _target_to_bool(target: int) -> bool:

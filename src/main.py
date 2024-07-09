@@ -6,7 +6,7 @@ This is the entrypoint of my RAG for Fake News App.
 import pandas as pd
 
 from config import config
-from test_suite import run_test
+from test_suite import run_test_suite
 
 if __name__ == '__main__':
     pd.set_option('mode.copy_on_write', True)
@@ -14,9 +14,22 @@ if __name__ == '__main__':
 
     df = pd.read_csv(config.AGGR_DATA_PATH)
 
-    if config.USE_SAMPLE:
-        unique_ids = df['id'].drop_duplicates()
-        unique_ids = unique_ids.sample(config.SAMPLE_SIZE)
-        df = pd.merge(df, unique_ids, how='inner', on='id')
+    # Set 'id' as index for performance
+    # Note: 'id' column is dropped by default (it becomes the index)
+    df.set_index('id', drop=True, inplace=True)
+    df = df.drop(columns=['Unnamed: 0'])
 
-    run_test(df)
+    if config.USE_SAMPLE:
+        ids = df.index.to_series()
+        unique_ids = ids.drop_duplicates()
+        unique_ids = unique_ids.sample(config.SAMPLE_SIZE)
+        df = pd.merge(df, unique_ids, how='inner', left_index=True, right_index=True)
+        df = df.drop(columns=['id'])
+
+    if config.DEBUG:
+        print("DataFrame loaded and indexed.")
+        print(f"DataFrame's shape: {df.shape}")
+        print(f"DataFrame's description: {df.describe(include='all')}")
+        print("Running test suite...")
+
+    run_test_suite(df)
