@@ -46,25 +46,31 @@ Your response MUST be either:
 
 def fact_check(fact: Fact, context_urls: pd.Series) -> bool:
     # Use the vector store as a retriever
-    vs_retriever = _create_context_from_urls(context_urls).as_retriever()
+    vs_retriever = _create_context_from_urls(context_urls).as_retriever(search_type="similarity", search_kwargs={"k": 6})
 
     # Retrieval chain
     retrieval_chain = (
         vs_retriever | _format_docs
     )
 
-    # Compose the chain
-    rag_chain = (
-            _prompt_template
-            | _llm
-            | StrOutputParser()
-    )
+    # Context retrieval
+    context_retrieval_query = "\n".join([fact.speaker, fact.text])
+    context = retrieval_chain.invoke(context_retrieval_query)
 
     if config.DEBUG:
-        print("\n\nPROMPT DATA:\n")
-        print(f"\nspeaker: {fact.speaker}\n")
-        print(f"\nfact: {fact.text}\n")
-        # print(f"\ncontext: {retrieval_chain.invoke("\n\n".join([fact.speaker, fact.text]))}\n")
+        print(f"\nCONTEXT RETRIEVAL QUERY:\n{context_retrieval_query}\n")
+
+    if config.SHOW_CONTEXT_FOR_DEBUG:
+        print(f"\nCONTEXT:\n{context}\n")
+
+    # Compose the chain
+    rag_chain = (
+        _prompt_template
+        | _llm
+        | StrOutputParser()
+    )
+
+    if config.SHOW_PROMPT_FORMAT_FOR_DEBUG:
         print("\n\nPROMPT FORMAT:\n")
         print(
             _prompt_template.invoke({
@@ -73,13 +79,16 @@ def fact_check(fact: Fact, context_urls: pd.Series) -> bool:
                 "context": "======PLACEHOLDER======"
             }).to_messages()
         )
-        print("\n\n")
+        print("\n")
+
+    if config.VERBOSE:
+        print("Invoking the RAG chain...")
 
     # Invoke the chain
     response = rag_chain.invoke({
         "speaker": fact.speaker,
         "fact": fact.text,
-        "context": retrieval_chain.invoke("\n\n".join([fact.speaker, fact.text]))
+        "context": context
     })
 
     if response not in ["TRUE", "FALSE"]:
@@ -105,12 +114,15 @@ def _create_context_from_urls(urls: pd.Series) -> VectorStore:
         try:
             # TODO class_=("post-content", "post-title", "post-header") (????)
             # TODO WebBaseLoader può caricare tutti gli url in un colpo solo senza il for (???)
+            if config.VERBOSE:
+                print(f"Loading URL: {url}")
+
             # Load from web
             web_loader = WebBaseLoader(url)
             docs = web_loader.load()
 
             # Split
-            text_splitter = RecursiveCharacterTextSplitter()
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
             docs = text_splitter.split_documents(docs)
 
             # Add to result
@@ -118,6 +130,9 @@ def _create_context_from_urls(urls: pd.Series) -> VectorStore:
 
         except Exception as e:
             print(f"WARNING: an exception occurred while loading the URL {url}. {e}")
+
+    if config.VERBOSE:
+        print("Building the vector store...")
 
     # Create a vector store from all the docs
     vector_store = FAISS.from_documents(result_docs, _embeddings)

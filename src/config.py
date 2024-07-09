@@ -17,8 +17,13 @@ class _Common:
     USE_SAMPLE = False  # Samples N (=SAMPLE_SIZE) IDs and the corresponding observations
     SAMPLE_SIZE = None
 
+    # Verbose
+    VERBOSE = False
+
     # Debug
     DEBUG = False
+    SHOW_CONTEXT_FOR_DEBUG = False
+    SHOW_PROMPT_FORMAT_FOR_DEBUG = False
 
     def __init__(self):
         """Default constructor.
@@ -37,12 +42,14 @@ class _Common:
 
 class _Local(_Common):
     AGGR_DATA_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/politifact-bing-retrieval/bert_aggregator_df.csv'
-    DEBUG = False
 
 
 class _LocalDebug(_Local):
+    VERBOSE = True
     DEBUG = True
-    TRUNCATED_RANKING_RESULTS = 2
+    SHOW_CONTEXT_FOR_DEBUG = True
+    SHOW_PROMPT_FORMAT_FOR_DEBUG = False
+    TRUNCATED_RANKING_RESULTS = 4
     USE_SAMPLE = True
     SAMPLE_SIZE = 3
 

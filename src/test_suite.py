@@ -17,9 +17,16 @@ def run_test_suite(df: pd.DataFrame):
 
     for id in unique_ids:
         id_data = _get_fact_and_target(id, df)
+
+        print(f"\n\nChecking ID: {id}")
+        if config.VERBOSE:
+            print(f"\nSpeaker: {id_data[0].speaker}")
+            print(f"Fact: {id_data[0].text}\n")
+
         rs = get_search_results(id, df)
         fact_check(id_data[0], rs)
 
+        # TODO: add target check to compute accuracy
         print(f"\nTHE TARGET IS: {_target_to_bool(id_data[1])}\n")
 
 

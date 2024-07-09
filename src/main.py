@@ -26,10 +26,13 @@ if __name__ == '__main__':
         df = pd.merge(df, unique_ids, how='inner', left_index=True, right_index=True)
         df = df.drop(columns=['id'])
 
-    if config.DEBUG:
+    if config.VERBOSE:
         print("DataFrame loaded and indexed.")
+
+    if config.DEBUG:
         print(f"DataFrame's shape: {df.shape}")
-        print(f"DataFrame's description: {df.describe(include='all')}")
-        print("Running test suite...")
+        # print(f"DataFrame's description: {df.describe(include='all')}")
+
+    print("Running test suite...")
 
     run_test_suite(df)
