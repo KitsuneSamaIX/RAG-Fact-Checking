@@ -151,5 +151,3 @@ def _create_context_from_urls(urls: pd.Series) -> VectorStore:
 #         )
 #     ),
 # )
-
-# text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
