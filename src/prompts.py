@@ -39,7 +39,7 @@ Check the following:
 """
 
 retry_msg = """\
-Your response MUST be either:
+You must respond in a single word and the response MUST be either:
 - "TRUE" if the fact is true;
 - "FALSE" if the fact is false.
 """
