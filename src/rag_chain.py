@@ -91,6 +91,7 @@ def fact_check(fact: Fact, context_urls: pd.Series) -> bool | None:
 
 
 def _response_parser(response: str) -> bool | None:
+    # TODO: refine TRUE/FALSE extraction to handle edge cases better (ex. "**TRUE**" should be correctly identified as "TRUE")
     match response:
         case "TRUE":
             return True

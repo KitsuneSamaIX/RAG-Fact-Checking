@@ -5,9 +5,13 @@ Note: keep sensitive data (like API keys) in environment variables.
 
 
 class _Common:
-    # Model
-    MODEL_SERVER = 'ollama'
-    MODEL_NAME = 'llama3'
+    # LLM
+    LLM_SERVER = 'ollama'
+    LLM_NAME = 'llama3'
+
+    # Embeddings model
+    EMBEDDINGS_SERVER = 'ollama'
+    EMBEDDINGS_NAME = 'nomic-embed-text'
 
     # Truncated ranking
     TRUNCATED_RANKING_RESULTS = 5
@@ -49,9 +53,9 @@ class _LocalDebug(_Local):
     DEBUG = True
     SHOW_CONTEXT_FOR_DEBUG = False
     SHOW_PROMPT_FOR_DEBUG = False
-    TRUNCATED_RANKING_RESULTS = 2
+    TRUNCATED_RANKING_RESULTS = 4
     USE_SAMPLE = True
-    SAMPLE_SIZE = 1
+    SAMPLE_SIZE = 5
 
 
 # Set config class
