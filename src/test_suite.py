@@ -15,19 +15,34 @@ def run_test_suite(df: pd.DataFrame):
     ids = df.index.to_series()
     unique_ids = ids.drop_duplicates()
 
+    n_correct = 0
+
     for id in unique_ids:
-        id_data = _get_fact_and_target(id, df)
+        try:
+            print(f"\n\nChecking ID: {id}")
 
-        print(f"\n\nChecking ID: {id}")
-        if config.VERBOSE:
-            print(f"\nSpeaker: {id_data[0].speaker}")
-            print(f"Fact: {id_data[0].text}\n")
+            id_data = _get_fact_and_target(id, df)
 
-        rs = get_search_results(id, df)
-        fact_check(id_data[0], rs)
+            if config.VERBOSE:
+                print(f"\nSpeaker: {id_data[0].speaker}")
+                print(f"Fact: {id_data[0].text}\n")
 
-        # TODO: add target check to compute accuracy
-        print(f"\nTHE TARGET IS: {_target_to_bool(id_data[1])}\n")
+            urls = get_search_results(id, df)
+            res = fact_check(id_data[0], urls)
+
+            target = _target_to_bool(id_data[1])
+
+            if config.VERBOSE:
+                print(f"\nThe target is: {target}\n")
+
+            if res == target:
+                n_correct += 1
+
+        except Exception as e:
+            print(f"WARNING: an exception occurred while checking the ID {id}. {e}")
+
+    # Report statistics
+    print(f"\n\n\n\nChecked {len(unique_ids)} IDs, correct answers: {n_correct}")
 
 
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:

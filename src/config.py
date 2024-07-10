@@ -23,7 +23,7 @@ class _Common:
     # Debug
     DEBUG = False
     SHOW_CONTEXT_FOR_DEBUG = False
-    SHOW_PROMPT_FORMAT_FOR_DEBUG = False
+    SHOW_PROMPT_FOR_DEBUG = False
 
     def __init__(self):
         """Default constructor.
@@ -47,11 +47,11 @@ class _Local(_Common):
 class _LocalDebug(_Local):
     VERBOSE = True
     DEBUG = True
-    SHOW_CONTEXT_FOR_DEBUG = True
-    SHOW_PROMPT_FORMAT_FOR_DEBUG = False
-    TRUNCATED_RANKING_RESULTS = 4
+    SHOW_CONTEXT_FOR_DEBUG = False
+    SHOW_PROMPT_FOR_DEBUG = False
+    TRUNCATED_RANKING_RESULTS = 2
     USE_SAMPLE = True
-    SAMPLE_SIZE = 3
+    SAMPLE_SIZE = 1
 
 
 # Set config class
