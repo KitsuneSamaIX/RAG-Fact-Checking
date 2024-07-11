@@ -5,6 +5,7 @@ Composes the RAG chain.
 
 import bs4
 import pandas as pd
+import re
 
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import WebBaseLoader
@@ -91,14 +92,12 @@ def fact_check(fact: Fact, context_urls: pd.Series) -> bool | None:
 
 
 def _response_parser(response: str) -> bool | None:
-    # TODO: refine TRUE/FALSE extraction to handle edge cases better (ex. "**TRUE**" should be correctly identified as "TRUE")
-    match response:
-        case "TRUE":
-            return True
-        case "FALSE":
-            return False
-        case _:
-            return None
+    if re.match(r".*TRUE.*", response, re.IGNORECASE):
+        return True
+    elif re.match(r".*FALSE.*", response, re.IGNORECASE):
+        return False
+    else:
+        return None
 
 
 def _format_docs(docs: list[Document]) -> str:
