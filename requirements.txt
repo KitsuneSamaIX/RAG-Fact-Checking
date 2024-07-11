@@ -1,5 +1,11 @@
-langchain >= 0.2.6
-langchain-community >= 0.2.6
+langchain >= 0.2.7
+langchain-community >= 0.2.7
 beautifulsoup4 >= 4.12.3
 faiss-cpu >= 1.8.0
 pandas >= 2.2.2
+
+# To upgrade all requirements (and their dependencies) to the latest version:
+# pip install -r requirements.txt --upgrade --upgrade-strategy eager
+
+# To check dependencies:
+# pip check
