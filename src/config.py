@@ -7,10 +7,12 @@ Note: keep sensitive data (like API keys) in environment variables.
 class _Common:
     # LLM
     LLM_SERVER = 'ollama'
-    LLM_NAME = 'llama3'
+    LLM_SERVER_URL = None  # For servers that are not automatically found
+    LLM_NAME = 'llama3.1'
 
     # Embeddings model
     EMBEDDINGS_SERVER = 'ollama'
+    EMBEDDINGS_SERVER_URL = None  # For servers that are not automatically found
     EMBEDDINGS_NAME = 'nomic-embed-text'
 
     # Truncated ranking
@@ -49,6 +51,26 @@ class _Local(_Common):
 
 
 class _LocalDebug(_Local):
+    VERBOSE = True
+    DEBUG = True
+    SHOW_CONTEXT_FOR_DEBUG = False
+    SHOW_PROMPT_FOR_DEBUG = False
+    TRUNCATED_RANKING_RESULTS = 4
+    USE_SAMPLE = True
+    SAMPLE_SIZE = 5
+
+
+class _UniudMitel3Server(_Common):
+    LLM_SERVER = 'vllm'
+    LLM_SERVER_URL = 'localhost:8005'
+    LLM_NAME = 'llama3.1'
+    EMBEDDINGS_SERVER = 'vllm'
+    EMBEDDINGS_SERVER_URL = 'localhost:8006'
+    EMBEDDINGS_NAME = 'nomic-embed-text'
+    AGGR_DATA_PATH = '/mnt/dmif-nas/SMDC/politifact-bing-retrieval/bert_aggregator_df.csv'
+
+
+class _UniudMitel3ServerDebug(_UniudMitel3Server):
     VERBOSE = True
     DEBUG = True
     SHOW_CONTEXT_FOR_DEBUG = False

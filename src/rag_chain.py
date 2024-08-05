@@ -14,7 +14,7 @@ from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 
-from llm import get_llm, get_embeddings
+from models import get_llm, get_embeddings
 from fact import Fact
 from prompts import get_fact_checking_prompt_template, retry_msg
 from config import config
