@@ -11,7 +11,7 @@ from rag_chain import fact_check
 from config import config
 
 
-def run_test_suite(df: pd.DataFrame):
+def run_test_suite(df: pd.DataFrame):  # TODO: add time used for the tests, print the progress (ex. 1/100, 2/200, etc.)
     ids = df.index.to_series()
     unique_ids = ids.drop_duplicates()
 
