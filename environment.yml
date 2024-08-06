@@ -7,3 +7,6 @@ dependencies:
   - pip
   - pip:
       - -r requirements.txt
+
+# To create the env:
+# conda env create -f environment.yml
