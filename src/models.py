@@ -4,9 +4,8 @@
 from langchain_core.language_models import BaseLanguageModel, BaseLLM, BaseChatModel
 from langchain_core.embeddings import Embeddings
 
-from langchain_community.llms import Ollama
-from langchain_community.chat_models import ChatOllama, ChatOpenAI
-from langchain_community.embeddings import OllamaEmbeddings, OpenAIEmbeddings  # TODO: replace imports subject to future deprecation
+from langchain_ollama import OllamaLLM, ChatOllama, OllamaEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from config import config
 
