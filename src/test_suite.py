@@ -44,7 +44,11 @@ def run_test_suite(df: pd.DataFrame):
             n_error += 1
 
     # Report statistics
-    print(f"\n\n\n\nChecked {len(unique_ids)} IDs, correct answers: {n_correct}, ID checks aborted due to errors: {n_error}")
+    print(f"\n\n\n\nREPORT:")
+    print(f"Checked IDs: {len(unique_ids)}")
+    print(f"Correct answers: {n_correct} ({n_correct / len(unique_ids) * 100}%)")
+    print(f"ID checks aborted due to errors: {n_error}")
+    print(f"Accuracy (excluding errors): {n_correct / (len(unique_ids) - n_error) * 100}%")
 
 
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:
