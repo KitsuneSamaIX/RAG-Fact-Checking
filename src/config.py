@@ -80,5 +80,10 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SAMPLE_SIZE = 5
 
 
+class _UniudMitel3ServerDebugTest(_UniudMitel3ServerDebug):
+    EMBEDDINGS_NAME = 'llama3.1'
+
+
 # Set config class
-config = _LocalDebug()
+# config = _LocalDebug()
+config = _UniudMitel3ServerDebugTest()
