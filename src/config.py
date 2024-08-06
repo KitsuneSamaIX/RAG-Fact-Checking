@@ -81,6 +81,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 class _UniudMitel3ServerDebugTest(_UniudMitel3ServerDebug):
+    EMBEDDINGS_SERVER_URL = 'localhost:8005'
     EMBEDDINGS_NAME = 'llama3.1'
 
 
