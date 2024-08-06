@@ -20,7 +20,7 @@ def get_llm() -> BaseLanguageModel:
             return ChatOpenAI(
                 model='meta-llama/Meta-Llama-3.1-8B-Instruct',
                 openai_api_key='EMPTY',
-                openai_api_base=config.LLM_SERVER,
+                openai_api_base=config.LLM_SERVER_URL,
                 max_tokens=5,
                 temperature=0
             )
@@ -38,7 +38,7 @@ def get_embeddings() -> Embeddings:
             return OpenAIEmbeddings(
                 model='meta-llama/Meta-Llama-3.1-8B-Instruct',
                 openai_api_key='EMPTY',
-                openai_api_base=config.LLM_SERVER
+                openai_api_base=config.EMBEDDINGS_SERVER_URL
             )
         case _:
             raise NotImplementedError()
