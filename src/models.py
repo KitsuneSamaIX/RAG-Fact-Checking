@@ -14,7 +14,7 @@ def get_llm() -> BaseLanguageModel:
     match config.LLM_SERVER, config.LLM_NAME:
         # Server: ollama
         case 'ollama', name:
-            return ChatOllama(model=name)
+            return ChatOllama(model=name)  # TODO try setting the temperature (the actual default is 0.8, I think) and also other parameters of ChatOllama
         # Some model names:
         #   llama3
         #   llama3.1
