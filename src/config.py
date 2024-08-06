@@ -85,7 +85,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SHOW_PROMPT_FOR_DEBUG = False
     TRUNCATED_RANKING_RESULTS = 4
     USE_SAMPLE = True
-    SAMPLE_SIZE = 30
+    SAMPLE_SIZE = 100
 
 
 # Set config class
