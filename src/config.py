@@ -61,12 +61,20 @@ class _LocalDebug(_Local):
 
 
 class _UniudMitel3Server(_Common):
-    LLM_SERVER = 'vllm'
-    LLM_SERVER_URL = 'http://localhost:8005/v1'
-    LLM_NAME = 'llama3.1'
-    EMBEDDINGS_SERVER = 'vllm'
-    EMBEDDINGS_SERVER_URL = 'http://localhost:8006/v1'
+    # vllm
+    # LLM_SERVER = 'vllm'
+    # LLM_SERVER_URL = 'http://localhost:8005/v1'
+    # LLM_NAME = 'meta-llama/Meta-Llama-3.1-8B-Instruct'
+    # EMBEDDINGS_SERVER = 'vllm'
+    # EMBEDDINGS_SERVER_URL = 'http://localhost:8006/v1'
+    # EMBEDDINGS_NAME = 'nomic-ai/nomic-embed-text-v1.5'
+
+    # ollama
+    LLM_SERVER = 'ollama'
+    LLM_NAME = 'llama3.1:8b-instruct-fp16'
+    EMBEDDINGS_SERVER = 'ollama'
     EMBEDDINGS_NAME = 'nomic-embed-text'
+
     AGGR_DATA_PATH = '/mnt/dmif-nas/SMDC/politifact-bing-retrieval/bert_aggregator_df.csv'
 
 
@@ -80,11 +88,6 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SAMPLE_SIZE = 5
 
 
-class _UniudMitel3ServerDebugTest(_UniudMitel3ServerDebug):
-    EMBEDDINGS_SERVER_URL = 'http://localhost:8005/v1'
-    EMBEDDINGS_NAME = 'llama3.1'
-
-
 # Set config class
 # config = _LocalDebug()
-config = _UniudMitel3ServerDebugTest()
+config = _UniudMitel3ServerDebug()
