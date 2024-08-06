@@ -16,6 +16,7 @@ def run_test_suite(df: pd.DataFrame):
     unique_ids = ids.drop_duplicates()
 
     n_correct = 0
+    n_error = 0
 
     for id in unique_ids:
         try:
@@ -40,9 +41,10 @@ def run_test_suite(df: pd.DataFrame):
 
         except Exception as e:
             print(f"WARNING: an exception occurred while checking the ID {id}. {e}")
+            n_error += 1
 
     # Report statistics
-    print(f"\n\n\n\nChecked {len(unique_ids)} IDs, correct answers: {n_correct}")
+    print(f"\n\n\n\nChecked {len(unique_ids)} IDs, correct answers: {n_correct}, ID checks aborted due to errors: {n_error}")
 
 
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:
