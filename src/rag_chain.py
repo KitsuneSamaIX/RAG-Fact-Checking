@@ -26,7 +26,7 @@ _embeddings = get_embeddings()
 
 def fact_check(fact: Fact, context_urls: pd.Series) -> bool | None:
     # Use the vector store as a retriever
-    vs_retriever = _create_context_from_urls(context_urls).as_retriever(search_type="similarity", search_kwargs={"k": 6})
+    vs_retriever = _create_context_from_urls(context_urls).as_retriever(search_type="similarity", search_kwargs={"k": 8})
 
     # Retrieval chain
     retrieval_chain = (
