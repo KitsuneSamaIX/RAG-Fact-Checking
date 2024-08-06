@@ -62,10 +62,10 @@ class _LocalDebug(_Local):
 
 class _UniudMitel3Server(_Common):
     LLM_SERVER = 'vllm'
-    LLM_SERVER_URL = 'http://localhost:8005'
+    LLM_SERVER_URL = 'http://localhost:8005/v1'
     LLM_NAME = 'llama3.1'
     EMBEDDINGS_SERVER = 'vllm'
-    EMBEDDINGS_SERVER_URL = 'http://localhost:8006'
+    EMBEDDINGS_SERVER_URL = 'http://localhost:8006/v1'
     EMBEDDINGS_NAME = 'nomic-embed-text'
     AGGR_DATA_PATH = '/mnt/dmif-nas/SMDC/politifact-bing-retrieval/bert_aggregator_df.csv'
 
@@ -81,7 +81,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 class _UniudMitel3ServerDebugTest(_UniudMitel3ServerDebug):
-    EMBEDDINGS_SERVER_URL = 'http://localhost:8005'
+    EMBEDDINGS_SERVER_URL = 'http://localhost:8005/v1'
     EMBEDDINGS_NAME = 'llama3.1'
 
 
