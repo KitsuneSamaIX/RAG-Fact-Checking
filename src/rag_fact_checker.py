@@ -48,7 +48,7 @@ class RAGFactChecker:
         )
 
         # Context retrieval
-        context_retrieval_query = "\n".join([fact.speaker, fact.text])
+        context_retrieval_query = "\n".join([fact.speaker, fact.text])  # TODO: add 'date' field to query, it could be useful
         context = retrieval_chain.invoke(context_retrieval_query)
 
         # Input data

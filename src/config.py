@@ -23,7 +23,7 @@ class _Common:
     # Classification levels
     #   2 -> use True/False.
     #   6 -> use all 6 levels of the TRUTH-O-METER labels of "politifact.com".
-    CLASSIFICATION_LEVELS = 2
+    CLASSIFICATION_LEVELS = 2  # TODO: implement
 
     # Retrieval mode
     #   'bing+vs'   -> retrieve N results from Bing, build a vector store from those results and then retrieve N
@@ -119,16 +119,34 @@ class _Common:
     # BACKEND & DATA
     # #################################
 
-    # Evidence
-    USE_CACHED_URLS = True  # Makes sense only when using the URLs retrieved from the search engine (ex. Bing)
+    # >>> DATASET FORMAT <<<
+    #
+    # There are 3 types of datasets:
+    #
+    #   - GROUND_TRUTH_DATASET (required)
+    #       - columns: id, speaker, text, date, target
+    #
+    #   - SEARCH_ENGINE_RESULTS_DATASET (optional)
+    #       - columns: id, rank, snippet, url, uuid
+    #
+    #   - ALL_EVIDENCE_VECTOR_STORE (optional) (not a dataset but a prebuilt vector store with all evidence)
+    #
+    # Note: one between SEARCH_ENGINE_RESULTS_DATASET and ALL_EVIDENCE_VECTOR_STORE is required!
+
+    # Dataset locations
+    GROUND_TRUTH_DATASET_PATH = None
+    SEARCH_ENGINE_RESULTS_DATASET_PATH = None
+
+    # URLs
+    USE_CACHED_URLS = True  # Makes sense only when using the URLs retrieved from the search engine (ex. Bing) # TODO: implement
+    CACHED_URLS_PATH = None
 
     # Vector store
     VECTOR_STORE_BACKEND = 'FAISS'  # Note: currently this parameter has NO effect, it is here only for documentation purposes
-
-    # Data locations
-    HUGGING_FACE_CACHE = None
-    AGGR_DATA_PATH = None  # Location of the aggregated dataset
     ALL_EVIDENCE_VECTOR_STORE_PATH = None  # Location of the vector store containing all evidence
+
+    # Other data locations
+    HUGGING_FACE_CACHE = None
 
     # #################################
     # CODE
@@ -149,8 +167,8 @@ class _Common:
         """
         cls = type(self)
 
-        if cls.AGGR_DATA_PATH is None:
-            raise RuntimeError("Configuration parameter 'AGGR_DATA_PATH' must be set.")
+        if cls.GROUND_TRUTH_DATASET_PATH is None:
+            raise RuntimeError("Configuration parameter 'GROUND_TRUTH_DATASET_PATH' must be set.")
 
         if cls.USE_SAMPLE:
             if cls.SAMPLE_SIZE is None or not cls.SAMPLE_SIZE > 0:
@@ -162,7 +180,9 @@ class _Common:
 
 
 class _Local(_Common):
-    AGGR_DATA_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/politifact-bing-retrieval/bert_aggregator_df.csv'
+    GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
+    SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/512' # TODO use other chunk sizes 512, 1024, etc
 
     @classmethod
     def get_llm(cls) -> BaseLanguageModel:
@@ -188,12 +208,13 @@ class _LocalDebug(_Local):
 
 
 class _UniudMitel3Server(_Common):
-    HUGGING_FACE_CACHE = '/mnt/dmif-nas/SMDC/HF-Cache'
-
-    RETRIEVAL_MODE = 'vs'
+    GROUND_TRUTH_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/ground_truth.csv'
+    SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/512'
 
-    AGGR_DATA_PATH = '/mnt/dmif-nas/SMDC/politifact-bing-retrieval/bert_aggregator_df.csv'
+    RETRIEVAL_MODE = 'vs'
+
+    HUGGING_FACE_CACHE = '/mnt/dmif-nas/SMDC/HF-Cache'
 
     # @classmethod
     # def get_llm(cls) -> BaseLanguageModel:  # vllm (it mimics the OpenAI API)

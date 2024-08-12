@@ -19,7 +19,7 @@ def create_retriever_from_urls(urls: pd.Series) -> BaseRetriever:
 
 
 def create_retriever_from_vector_store(vector_store: VectorStore) -> BaseRetriever:
-    vs_retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 8})
+    vs_retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 8})  # TODO: these parameters should be in config (k is for the truncated ranking)
     return vs_retriever
 
 
@@ -36,7 +36,7 @@ def _create_vector_store_from_urls(urls: pd.Series) -> VectorStore:
             docs = web_loader.load()
 
             # Split
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)  # TODO: these parameters should be in config
             docs = text_splitter.split_documents(docs)
 
             # Add to result

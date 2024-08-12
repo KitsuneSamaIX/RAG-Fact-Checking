@@ -5,3 +5,4 @@ from dataclasses import dataclass
 class Fact:
     speaker: str
     text: str
+    date: str

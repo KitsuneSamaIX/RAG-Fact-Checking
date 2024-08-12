@@ -11,36 +11,39 @@ from static_search import get_search_results
 from fact import Fact
 from rag_fact_checker import RAGFactChecker
 from config import config
+from dataset_loader import load_ground_truth_dataset, load_search_engine_results_dataset
 
 
-def run_test_suite(df: pd.DataFrame):
-    ids = df.index.to_series()
-    unique_ids = ids.drop_duplicates()
+def run_test_suite():
+    # Load datasets
+    ground_truth_df = load_ground_truth_dataset()
+    if config.RETRIEVAL_MODE == 'bing+vs':
+        search_engine_results_df = load_search_engine_results_dataset()
+
+    # Gather IDs
+    ids = ground_truth_df.index.to_series()
 
     # Track execution progress
     n_done = 0
 
     # Initialize statistics
-    n_total = len(unique_ids)
+    n_total = len(ids)
     n_correct = 0
     n_error = 0
     n_true_positive = 0
     n_false_positive = 0
     n_false_negative = 0
 
-    # Declare fact-checker
-    fact_checker = None
-
     # If RETRIEVAL_MODE == 'vs' then we can keep using the same RAGFactChecker
     if config.RETRIEVAL_MODE == 'vs':
         vector_store = FAISS.load_local(config.ALL_EVIDENCE_VECTOR_STORE_PATH, config.get_embeddings())
         fact_checker = RAGFactChecker.from_vector_store(vector_store)
 
-    for id in unique_ids:
+    for id in ids:
         try:
             print(f"\n\nChecking ID: {id}")
 
-            id_data = _get_fact_and_target(id, df)
+            id_data = _get_fact_and_target(id, ground_truth_df)
 
             if config.VERBOSE:
                 print(f"\nSpeaker: {id_data[0].speaker}")
@@ -48,7 +51,7 @@ def run_test_suite(df: pd.DataFrame):
 
             # If RETRIEVAL_MODE == 'bing+vs' then we need a new RAGFactChecker each time
             if config.RETRIEVAL_MODE == 'bing+vs':
-                urls = get_search_results(id, df)
+                urls = get_search_results(id, search_engine_results_df)
                 fact_checker = RAGFactChecker.from_urls(urls)
 
             res = fact_checker.check(id_data[0])
@@ -79,6 +82,11 @@ def run_test_suite(df: pd.DataFrame):
             print(f"\n\nEXECUTION PROGRESS: done {n_done}/{n_total} ({(n_done / n_total) * 100:.2f}%)")
 
     # Report statistics
+    _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative)
+
+
+def _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative):
+    # Report statistics
     print("\n\n\n\nREPORT:")
     if n_total == n_error:
         print("All ID checks have been aborted due to errors! Check code or network configuration.")
@@ -100,11 +108,12 @@ def run_test_suite(df: pd.DataFrame):
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:
     """Gets the fact and the target value of the passed id.
     """
-    single_row = df.loc[df.index == id, ['speaker', 'text', 'target']].iloc[0]
+    single_row = df.loc[df.index == id, ['speaker', 'text', 'date', 'target']].iloc[0]
 
     fact = Fact(
         speaker=single_row['speaker'],
-        text=single_row['text']
+        text=single_row['text'],
+        date=single_row['date']
     )
     target = single_row['target']
 
@@ -131,6 +140,3 @@ def _target_to_bool(target: int) -> bool:
         return False
     else:
         return True
-
-
-# TODO use proper logging lib for logging
