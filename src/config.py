@@ -3,25 +3,136 @@
 Note: keep sensitive data (like API keys) in environment variables.
 """
 
+from langchain_core.language_models import BaseLanguageModel, BaseLLM, BaseChatModel
+from langchain_core.embeddings import Embeddings
+
+from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_huggingface import HuggingFaceEmbeddings
+
 
 class _Common:
-    # LLM
-    LLM_SERVER = 'ollama'
-    LLM_SERVER_URL = None  # For servers that are not automatically found
-    LLM_NAME = 'llama3.1'
+    # #################################
+    # CORE
+    # #################################
 
-    # Embeddings model
-    EMBEDDINGS_SERVER = 'ollama'
-    EMBEDDINGS_SERVER_URL = None  # For servers that are not automatically found
-    EMBEDDINGS_NAME = 'nomic-embed-text'
+    # LLM
+    LLM_TEMPERATURE = 0
+    LLM_MAX_TOKENS = 20
+
+    # Classification levels
+    #   2 -> use True/False.
+    #   6 -> use all 6 levels of the TRUTH-O-METER labels of "politifact.com".
+    CLASSIFICATION_LEVELS = 2
+
+    # Retrieval mode
+    #   'bing+vs'   -> retrieve N results from Bing, build a vector store from those results and then retrieve N
+    #                   documents from the vector store.
+    #   'vs'        -> use a single vector store with all the evidence.
+    RETRIEVAL_MODE = 'bing+vs'
 
     # Truncated ranking
     TRUNCATED_RANKING_RESULTS = 5
 
     # Data
-    AGGR_DATA_PATH = None
-    USE_SAMPLE = False  # Samples N (=SAMPLE_SIZE) IDs and the corresponding observations
+    USE_SAMPLE = False  # Sample N (=SAMPLE_SIZE) IDs and the corresponding observations
     SAMPLE_SIZE = None
+
+    # #################################
+    # MODELS
+    # #################################
+
+    @classmethod
+    def get_llm(cls) -> BaseLanguageModel:
+        """LLM getter.
+
+        Some model examples for each server:
+
+        ------------------------------------------------------------
+
+        Server: ollama
+
+        Model names:
+            llama3
+            llama3.1
+            llama3.1:8b-instruct-fp16
+
+        Instance:
+            ChatOllama(
+                model=XXX,
+                temperature=XXX,
+                num_predict=XXX
+            )
+
+        ------------------------------------------------------------
+
+        Server: vllm
+
+        Model names:
+            meta-llama/Meta-Llama-3.1-8B-Instruct
+
+        Instance:
+            ChatOpenAI(
+                model=XXX,
+                openai_api_key='EMPTY',
+                openai_api_base=XXX,
+                temperature=XXX,
+                max_tokens=XXX
+            )
+        """
+        raise NotImplementedError("You need to set a model in the config.")
+
+    @classmethod
+    def get_embeddings(cls) -> Embeddings:
+        """Embeddings getter.
+
+        Some model examples for each server:
+
+        ------------------------------------------------------------
+
+        Server: ollama
+
+        Model names:
+            nomic-embed-text
+
+        Instance:
+            OllamaEmbeddings(model=XXX)
+
+        ------------------------------------------------------------
+
+        Server: huggingface
+
+        Model names:
+            sentence-transformers/all-mpnet-base-v2
+
+        Instance:
+            HuggingFaceEmbeddings(
+                model_name=XXX,
+                model_kwargs={'device': 0},
+                encode_kwargs={'normalize_embeddings': True},
+                cache_folder=XXX
+            )
+        """
+        raise NotImplementedError("You need to set a model in the config.")
+
+    # #################################
+    # BACKEND & DATA
+    # #################################
+
+    # Evidence
+    USE_CACHED_URLS = True  # Makes sense only when using the URLs retrieved from the search engine (ex. Bing)
+
+    # Vector store
+    VECTOR_STORE_BACKEND = 'FAISS'  # Note: currently this parameter has NO effect, it is here only for documentation purposes
+
+    # Data locations
+    HUGGING_FACE_CACHE = None
+    AGGR_DATA_PATH = None  # Location of the aggregated dataset
+    ALL_EVIDENCE_VECTOR_STORE_PATH = None  # Location of the vector store containing all evidence
+
+    # #################################
+    # CODE
+    # #################################
 
     # Verbose
     VERBOSE = False
@@ -45,9 +156,25 @@ class _Common:
             if cls.SAMPLE_SIZE is None or not cls.SAMPLE_SIZE > 0:
                 raise RuntimeError("Configuration parameter 'SAMPLE_SIZE' must be set and >0.")
 
+        if cls.RETRIEVAL_MODE == 'vs':
+            if cls.ALL_EVIDENCE_VECTOR_STORE_PATH is None:
+                raise RuntimeError("Configuration parameter 'ALL_EVIDENCE_VECTOR_STORE_PATH' must be set.")
+
 
 class _Local(_Common):
     AGGR_DATA_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/politifact-bing-retrieval/bert_aggregator_df.csv'
+
+    @classmethod
+    def get_llm(cls) -> BaseLanguageModel:
+        return ChatOllama(
+            model='llama3.1',
+            temperature=cls.LLM_TEMPERATURE,
+            num_predict=cls.LLM_MAX_TOKENS
+        )
+
+    @classmethod
+    def get_embeddings(cls) -> Embeddings:
+        return OllamaEmbeddings(model='nomic-embed-text')
 
 
 class _LocalDebug(_Local):
@@ -61,21 +188,42 @@ class _LocalDebug(_Local):
 
 
 class _UniudMitel3Server(_Common):
-    # vllm
-    # LLM_SERVER = 'vllm'
-    # LLM_SERVER_URL = 'http://localhost:8005/v1'
-    # LLM_NAME = 'meta-llama/Meta-Llama-3.1-8B-Instruct'
-    # EMBEDDINGS_SERVER = 'vllm'
-    # EMBEDDINGS_SERVER_URL = 'http://localhost:8006/v1'
-    # EMBEDDINGS_NAME = 'nomic-ai/nomic-embed-text-v1.5'
+    HUGGING_FACE_CACHE = '/mnt/dmif-nas/SMDC/HF-Cache'
 
-    # ollama
-    LLM_SERVER = 'ollama'
-    LLM_NAME = 'llama3.1:8b-instruct-fp16'
-    EMBEDDINGS_SERVER = 'ollama'
-    EMBEDDINGS_NAME = 'nomic-embed-text'
+    RETRIEVAL_MODE = 'vs'
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/512'
 
     AGGR_DATA_PATH = '/mnt/dmif-nas/SMDC/politifact-bing-retrieval/bert_aggregator_df.csv'
+
+    # @classmethod
+    # def get_llm(cls) -> BaseLanguageModel:  # vllm (it mimics the OpenAI API)
+    #     return ChatOpenAI(
+    #         model='meta-llama/Meta-Llama-3.1-8B-Instruct',
+    #         openai_api_key='EMPTY',
+    #         openai_api_base='http://localhost:8005/v1',
+    #         temperature=cls.LLM_TEMPERATURE,
+    #         max_tokens=cls.LLM_MAX_TOKENS
+    #     )
+
+    @classmethod
+    def get_llm(cls) -> BaseLanguageModel:
+        return ChatOllama(
+            model='llama3.1:8b-instruct-fp16',
+            temperature=cls.LLM_TEMPERATURE,
+            num_predict=cls.LLM_MAX_TOKENS
+        )
+
+    @classmethod
+    def get_embeddings(cls) -> Embeddings:
+        if cls.RETRIEVAL_MODE == 'vs':
+            return HuggingFaceEmbeddings(
+                model_name='sentence-transformers/all-mpnet-base-v2',
+                model_kwargs={'device': 0},
+                encode_kwargs={'normalize_embeddings': True},
+                cache_folder=cls.HUGGING_FACE_CACHE,
+            )
+        else:
+            return OllamaEmbeddings(model='nomic-embed-text')
 
 
 class _UniudMitel3ServerDebug(_UniudMitel3Server):
@@ -89,5 +237,5 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 # Set config class
-# config = _LocalDebug()
-config = _UniudMitel3ServerDebug()
+config = _LocalDebug
+# config = _UniudMitel3ServerDebug

@@ -5,13 +5,15 @@ Executes tests and produces statistics.
 
 import pandas as pd
 
+from langchain_community.vectorstores import FAISS
+
 from static_search import get_search_results
 from fact import Fact
-from rag_chain import fact_check
+from rag_fact_checker import RAGFactChecker
 from config import config
 
 
-def run_test_suite(df: pd.DataFrame):  # TODO: add time used for the tests, print the progress (ex. 1/100, 2/200, etc.)
+def run_test_suite(df: pd.DataFrame):  # TODO: count time used for the tests, print the progress (ex. 1/100, 2/200, etc.)
     ids = df.index.to_series()
     unique_ids = ids.drop_duplicates()
 
@@ -23,6 +25,14 @@ def run_test_suite(df: pd.DataFrame):  # TODO: add time used for the tests, prin
     n_false_positive = 0
     n_false_negative = 0
 
+    # Declare fact-checker
+    fact_checker = None
+
+    # If RETRIEVAL_MODE == 'vs' then we can keep using the same RAGFactChecker
+    if config.RETRIEVAL_MODE == 'vs':
+        vector_store = FAISS.load_local(config.ALL_EVIDENCE_VECTOR_STORE_PATH, config.get_embeddings())
+        fact_checker = RAGFactChecker.from_vector_store(vector_store)
+
     for id in unique_ids:
         try:
             print(f"\n\nChecking ID: {id}")
@@ -33,8 +43,12 @@ def run_test_suite(df: pd.DataFrame):  # TODO: add time used for the tests, prin
                 print(f"\nSpeaker: {id_data[0].speaker}")
                 print(f"Fact: {id_data[0].text}\n")
 
-            urls = get_search_results(id, df)
-            res = fact_check(id_data[0], urls)
+            # If RETRIEVAL_MODE == 'bing+vs' then we need a new RAGFactChecker each time
+            if config.RETRIEVAL_MODE == 'bing+vs':
+                urls = get_search_results(id, df)
+                fact_checker = RAGFactChecker.from_urls(urls)
+
+            res = fact_checker.check(id_data[0])
 
             target = _target_to_bool(id_data[1])
 
@@ -110,3 +124,6 @@ def _target_to_bool(target: int) -> bool:
         return False
     else:
         return True
+
+
+# TODO use proper logging lib for logging
