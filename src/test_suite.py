@@ -13,9 +13,12 @@ from rag_fact_checker import RAGFactChecker
 from config import config
 
 
-def run_test_suite(df: pd.DataFrame):  # TODO: count time used for the tests, print the progress (ex. 1/100, 2/200, etc.)
+def run_test_suite(df: pd.DataFrame):
     ids = df.index.to_series()
     unique_ids = ids.drop_duplicates()
+
+    # Track execution progress
+    n_done = 0
 
     # Initialize statistics
     n_total = len(unique_ids)
@@ -71,23 +74,27 @@ def run_test_suite(df: pd.DataFrame):  # TODO: count time used for the tests, pr
             print(f"WARNING: an exception occurred while checking the ID {id}. {e}")
             n_error += 1
 
+        finally:
+            n_done += 1
+            print(f"\n\nEXECUTION PROGRESS: done {n_done}/{n_total} ({(n_done / n_total) * 100:.2f}%)")
+
     # Report statistics
     print("\n\n\n\nREPORT:")
     if n_total == n_error:
         print("All ID checks have been aborted due to errors! Check code or network configuration.")
     else:
         print(f"Checked IDs: {n_total}")
-        print(f"Correct answers: {n_correct} ({(n_correct / n_total) * 100}%)")
+        print(f"Correct answers: {n_correct} ({(n_correct / n_total) * 100:.2f}%)")
         print(f"ID checks aborted due to errors: {n_error}")
         print("\nMETRICS (excluding aborted checks):")
         accuracy = n_correct / (n_total - n_error)
         precision = n_true_positive / (n_true_positive + n_false_positive)
         recall = n_true_positive / (n_true_positive + n_false_negative)
         f1 = 2 * ((precision * recall) / (precision + recall))
-        print(f"Accuracy: {accuracy}")
-        print(f"Precision: {precision}")
-        print(f"Recall: {recall}")
-        print(f"F1: {f1}")
+        print(f"Accuracy: {accuracy:.2f}")
+        print(f"Precision: {precision:.2f}")
+        print(f"Recall: {recall:.2f}")
+        print(f"F1: {f1:.2f}")
 
 
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:

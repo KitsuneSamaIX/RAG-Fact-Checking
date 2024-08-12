@@ -3,6 +3,8 @@
 This is the entrypoint of my RAG for Fake News App.
 """
 
+import time
+
 import pandas as pd
 
 from config import config
@@ -35,4 +37,10 @@ if __name__ == '__main__':
 
     print("Running test suite...")
 
+    start_time = time.time()
+
     run_test_suite(df)
+
+    finish_time = (time.time() - start_time)
+
+    print(f"\nELAPSED TIME (seconds): {finish_time:.2f} ({finish_time / 60:.2f} minutes)")
