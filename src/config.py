@@ -211,7 +211,7 @@ class _LocalDebug(_Local):
     SHOW_PROMPT_FOR_DEBUG = False
     TRUNCATED_RANKING_RESULTS = 4
     USE_SAMPLE = True
-    SAMPLE_SIZE = 5
+    SAMPLE_SIZE = 10
 
 
 class _UniudMitel3Server(_Common):
