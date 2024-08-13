@@ -161,11 +161,12 @@ class _Common:
     SHOW_PROMPT_FOR_DEBUG = False
 
     def __init__(self):
-        """Default constructor.
+        raise RuntimeError("The configuration class is not meant to be instantiated.")
 
-        Checks for common oversights in configuration parameters.
+    @classmethod
+    def check(cls):
+        """Checks for common oversights in configuration parameters.
         """
-        cls = type(self)
 
         if cls.GROUND_TRUTH_DATASET_PATH is None:
             raise RuntimeError("Configuration parameter 'GROUND_TRUTH_DATASET_PATH' must be set.")
@@ -178,11 +179,17 @@ class _Common:
             if cls.ALL_EVIDENCE_VECTOR_STORE_PATH is None:
                 raise RuntimeError("Configuration parameter 'ALL_EVIDENCE_VECTOR_STORE_PATH' must be set.")
 
+        if cls.USE_CACHED_URLS:
+            if cls.CACHED_URLS_PATH is None:
+                raise RuntimeError("Configuration parameter 'CACHED_URLS_PATH' must be set.")
+
 
 class _Local(_Common):
     GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/512' # TODO use other chunk sizes 512, 1024, etc
+
+    CACHED_URLS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/evidence_to_index'
 
     @classmethod
     def get_llm(cls) -> BaseLanguageModel:
@@ -260,3 +267,5 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 # Set config class
 config = _LocalDebug
 # config = _UniudMitel3ServerDebug
+
+config.check()

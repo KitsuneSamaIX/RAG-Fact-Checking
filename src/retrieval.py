@@ -3,9 +3,11 @@
 The setup of retrievers for RAG is handled here.
 """
 
+import os
+
 import pandas as pd
 
-from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.document_loaders import WebBaseLoader, BSHTMLLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.vectorstores import VectorStore
@@ -28,12 +30,19 @@ def _create_vector_store_from_urls(urls: pd.Series) -> VectorStore:
 
     for url in urls:
         try:
-            if config.VERBOSE:
-                print(f"Loading URL: {url}")
-
-            # Load from web
-            web_loader = WebBaseLoader(url)
-            docs = web_loader.load()
+            if config.USE_CACHED_URLS:
+                # Load from HTML file
+                # Note: when config.USE_CACHED_URLS is True then each 'url' is a UUID
+                if config.VERBOSE:
+                    print(f"Loading cached URL: {url}")
+                html_loader = BSHTMLLoader(os.path.join(config.CACHED_URLS_PATH, url + '.html'))
+                docs = html_loader.load()
+            else:
+                # Load from web
+                if config.VERBOSE:
+                    print(f"Loading URL: {url}")
+                web_loader = WebBaseLoader(url)
+                docs = web_loader.load()
 
             # Split
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)  # TODO: these parameters should be in config

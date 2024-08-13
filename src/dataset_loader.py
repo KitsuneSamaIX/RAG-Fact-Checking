@@ -26,7 +26,7 @@ def load_ground_truth_dataset() -> pd.DataFrame:
     return df
 
 
-def load_search_engine_results_dataset() -> pd.DataFrame:  # TODO implement
+def load_search_engine_results_dataset() -> pd.DataFrame:
     df = pd.read_csv(config.SEARCH_ENGINE_RESULTS_DATASET_PATH)
 
     # Set 'id' as index for performance
