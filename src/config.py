@@ -5,10 +5,15 @@ Note: keep sensitive data (like API keys) in environment variables.
 
 from langchain_core.language_models import BaseLanguageModel, BaseLLM, BaseChatModel
 from langchain_core.embeddings import Embeddings
+from langchain_core.documents import BaseDocumentCompressor
 
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI
+
 from langchain_huggingface import HuggingFaceEmbeddings
+
+from langchain.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
 
 class _Common:
@@ -33,7 +38,7 @@ class _Common:
 
     # Retrieval
     VECTOR_STORE_SEARCH_TYPE = 'similarity'
-    USE_RERANKER = True
+    USE_RERANKER = False
 
     # Text splitter
     TEXT_SPLITTER_CHUNK_SIZE = 1000
@@ -41,7 +46,7 @@ class _Common:
 
     # Truncated ranking
     TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = 4  # Keep the N highest ranking docs when retrieving from search engine results.
-    TRUNCATED_RANKING_VECTOR_STORE_RESULTS = 6  # Keep the N highest ranking docs when retrieving from vector store results.
+    TRUNCATED_RANKING_RETRIEVER_RESULTS = 6  # Keep the N highest ranking docs when retrieving from retriever results.
 
     # Data
     USE_SAMPLE = False  # Sample N (=SAMPLE_SIZE) IDs and the corresponding observations
@@ -121,6 +126,14 @@ class _Common:
                 encode_kwargs={'normalize_embeddings': True},
                 cache_folder=XXX
             )
+        """
+        raise NotImplementedError("You need to set a model in the config.")
+
+    @classmethod
+    def get_document_compressor(cls) -> BaseDocumentCompressor:
+        """Document compressor getter.
+
+        Note: this is used for re-ranking.
         """
         raise NotImplementedError("You need to set a model in the config.")
 
@@ -212,6 +225,14 @@ class _Local(_Common):
     def get_embeddings(cls) -> Embeddings:
         return OllamaEmbeddings(model='nomic-embed-text')
 
+    @classmethod
+    def get_document_compressor(cls) -> BaseDocumentCompressor:
+        model = HuggingFaceCrossEncoder(
+            model_name='BAAI/bge-reranker-base'
+        )
+        compressor = CrossEncoderReranker(model=model, top_n=cls.TRUNCATED_RANKING_RETRIEVER_RESULTS)
+        return compressor
+
 
 class _LocalDebug(_Local):
     VERBOSE = True
@@ -220,7 +241,8 @@ class _LocalDebug(_Local):
     SHOW_PROMPT_FOR_DEBUG = False
     USE_SAMPLE = True
     SAMPLE_SIZE = 10
-    RETRIEVAL_MODE = 'vs'
+    # RETRIEVAL_MODE = 'vs'
+    USE_RERANKER = True
 
 
 class _UniudMitel3Server(_Common):
@@ -257,10 +279,18 @@ class _UniudMitel3Server(_Common):
                 model_name='sentence-transformers/all-mpnet-base-v2',
                 model_kwargs={'device': 0},
                 encode_kwargs={'normalize_embeddings': True},
-                cache_folder=cls.HUGGING_FACE_CACHE,
+                cache_folder=cls.HUGGING_FACE_CACHE
             )
         else:
             return OllamaEmbeddings(model='nomic-embed-text')
+
+    @classmethod
+    def get_document_compressor(cls) -> BaseDocumentCompressor:
+        model = HuggingFaceCrossEncoder(
+            model_name='BAAI/bge-reranker-base'
+        )
+        compressor = CrossEncoderReranker(model=model, top_n=cls.TRUNCATED_RANKING_RETRIEVER_RESULTS)
+        return compressor
 
 
 class _UniudMitel3ServerDebug(_UniudMitel3Server):

@@ -1,6 +1,4 @@
 """Evidence retrieval
-
-The setup of retrievers for RAG is handled here.
 """
 
 import os
@@ -12,6 +10,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.retrievers import ContextualCompressionRetriever
 
 from config import config
 
@@ -21,10 +20,22 @@ def create_retriever_from_urls(urls: pd.Series) -> BaseRetriever:
 
 
 def create_retriever_from_vector_store(vector_store: VectorStore) -> BaseRetriever:
+    if config.USE_RERANKER:
+        n_docs_to_return = 20
+    else:
+        n_docs_to_return = config.TRUNCATED_RANKING_RETRIEVER_RESULTS
+
     vs_retriever = vector_store.as_retriever(
         search_type=config.VECTOR_STORE_SEARCH_TYPE,
-        search_kwargs={'k': config.TRUNCATED_RANKING_VECTOR_STORE_RESULTS}
+        search_kwargs={'k': n_docs_to_return}
     )
+
+    if config.USE_RERANKER:
+        compression_retriever = ContextualCompressionRetriever(
+            base_compressor=config.get_document_compressor(), base_retriever=vs_retriever
+        )
+        return compression_retriever
+
     return vs_retriever
 
 
