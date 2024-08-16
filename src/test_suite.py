@@ -36,7 +36,12 @@ def run_test_suite():
 
     # If RETRIEVAL_MODE == 'vs' then we can keep using the same RAGFactChecker
     if config.RETRIEVAL_MODE == 'vs':
-        vector_store = FAISS.load_local(config.ALL_EVIDENCE_VECTOR_STORE_PATH, config.get_embeddings())
+        vector_store = FAISS.load_local(
+            folder_path=config.ALL_EVIDENCE_VECTOR_STORE_PATH,
+            embeddings=config.get_embeddings(),
+            index_name="FAISS_INDEX_CHUNK_SIZE_512",  # TODO this 512 should be a parameter
+            allow_dangerous_deserialization=True
+        )
         fact_checker = RAGFactChecker.from_vector_store(vector_store)
 
     for id in ids:
@@ -52,6 +57,8 @@ def run_test_suite():
             # If RETRIEVAL_MODE == 'bing+vs' then we need a new RAGFactChecker each time
             if config.RETRIEVAL_MODE == 'bing+vs':
                 urls = get_search_results(id, search_engine_results_df)
+                if urls.empty:
+                    raise RuntimeError(f"No URLs found for ID '{id}'.")
                 fact_checker = RAGFactChecker.from_urls(urls)
 
             res = fact_checker.check(id_data[0])
@@ -95,10 +102,22 @@ def _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_posi
         print(f"Correct answers: {n_correct} ({(n_correct / n_total) * 100:.2f}%)")
         print(f"ID checks aborted due to errors: {n_error}")
         print("\nMETRICS (excluding aborted checks):")
-        accuracy = n_correct / (n_total - n_error)
-        precision = n_true_positive / (n_true_positive + n_false_positive)
-        recall = n_true_positive / (n_true_positive + n_false_negative)
-        f1 = 2 * ((precision * recall) / (precision + recall))
+        try:
+            accuracy = n_correct / (n_total - n_error)
+        except ZeroDivisionError:
+            accuracy = float('NaN')
+        try:
+            precision = n_true_positive / (n_true_positive + n_false_positive)
+        except ZeroDivisionError:
+            precision = float('NaN')
+        try:
+            recall = n_true_positive / (n_true_positive + n_false_negative)
+        except ZeroDivisionError:
+            recall = float('NaN')
+        try:
+            f1 = 2 * ((precision * recall) / (precision + recall))
+        except ZeroDivisionError:
+            f1 = float('NaN')
         print(f"Accuracy: {accuracy:.2f}")
         print(f"Precision: {precision:.2f}")
         print(f"Recall: {recall:.2f}")

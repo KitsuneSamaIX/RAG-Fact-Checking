@@ -18,7 +18,7 @@ class _Common:
 
     # LLM
     LLM_TEMPERATURE = 0
-    LLM_MAX_TOKENS = 20
+    LLM_MAX_TOKENS = 1
 
     # Classification levels
     #   2 -> use True/False.
@@ -31,8 +31,17 @@ class _Common:
     #   'vs'        -> use a single vector store with all the evidence.
     RETRIEVAL_MODE = 'bing+vs'
 
+    # Retrieval
+    VECTOR_STORE_SEARCH_TYPE = 'similarity'
+    USE_RAG_FUSION = False
+
+    # Text splitter
+    TEXT_SPLITTER_CHUNK_SIZE = 1000
+    TEXT_SPLITTER_CHUNK_OVERLAP = 200
+
     # Truncated ranking
-    TRUNCATED_RANKING_RESULTS = 5
+    TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = 4  # Keep the N highest ranking docs when retrieving from search engine results.
+    TRUNCATED_RANKING_VECTOR_STORE_RESULTS = 6  # Keep the N highest ranking docs when retrieving from vector store results.
 
     # Data
     USE_SAMPLE = False  # Sample N (=SAMPLE_SIZE) IDs and the corresponding observations
@@ -79,6 +88,14 @@ class _Common:
                 temperature=XXX,
                 max_tokens=XXX
             )
+        """
+        raise NotImplementedError("You need to set a model in the config.")
+
+    @classmethod
+    def get_llm_for_rag_fusion(cls) -> BaseLanguageModel:
+        """LLM getter for RAG Fusion.
+
+        Note: RAG fusion can't use an LLM with, for example, 'LLM_MAX_TOKENS = 1'.
         """
         raise NotImplementedError("You need to set a model in the config.")
 
@@ -138,7 +155,7 @@ class _Common:
     SEARCH_ENGINE_RESULTS_DATASET_PATH = None
 
     # URLs
-    USE_CACHED_URLS = True  # Makes sense only when using the URLs retrieved from the search engine (ex. Bing) # TODO: implement
+    USE_CACHED_URLS = True  # Makes sense only when using the URLs retrieved from a search engine (ex. Bing)
     CACHED_URLS_PATH = None
 
     # Vector store
@@ -200,6 +217,13 @@ class _Local(_Common):
         )
 
     @classmethod
+    def get_llm_for_rag_fusion(cls) -> BaseLanguageModel:
+        return ChatOllama(
+            model='llama3.1',
+            temperature=cls.LLM_TEMPERATURE
+        )
+
+    @classmethod
     def get_embeddings(cls) -> Embeddings:
         return OllamaEmbeddings(model='nomic-embed-text')
 
@@ -209,9 +233,10 @@ class _LocalDebug(_Local):
     DEBUG = True
     SHOW_CONTEXT_FOR_DEBUG = False
     SHOW_PROMPT_FOR_DEBUG = False
-    TRUNCATED_RANKING_RESULTS = 4
     USE_SAMPLE = True
     SAMPLE_SIZE = 10
+    RETRIEVAL_MODE = 'vs'
+    USE_RAG_FUSION = True
 
 
 class _UniudMitel3Server(_Common):
@@ -259,7 +284,6 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     DEBUG = True
     SHOW_CONTEXT_FOR_DEBUG = False
     SHOW_PROMPT_FOR_DEBUG = False
-    TRUNCATED_RANKING_RESULTS = 4
     USE_SAMPLE = True
     SAMPLE_SIZE = 100
 

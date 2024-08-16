@@ -21,7 +21,7 @@ def get_search_results(id: str, df: pd.DataFrame) -> pd.Series:
     If config.USE_CACHED_URLS is True then the UUIDs of the cached URLs are returned instead.
 
     Note:
-    - N = config.TRUNCATED_RANKING_RESULTS
+    - N = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
     """
     df = df[df.index == id]
     df = df.sort_values('rank')
@@ -29,5 +29,5 @@ def get_search_results(id: str, df: pd.DataFrame) -> pd.Series:
         df = df['uuid']
     else:
         df = df['url']
-    df = df.iloc[0:config.TRUNCATED_RANKING_RESULTS]
+    df = df.iloc[0:config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS]
     return df
