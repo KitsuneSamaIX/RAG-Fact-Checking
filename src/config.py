@@ -299,7 +299,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     DEBUG = True
     SHOW_CONTEXT_FOR_DEBUG = False
     SHOW_PROMPT_FOR_DEBUG = False
-    USE_SAMPLE = True
+    # USE_SAMPLE = True
     SAMPLE_SIZE = 100
 
 
