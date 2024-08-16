@@ -33,7 +33,7 @@ class _Common:
 
     # Retrieval
     VECTOR_STORE_SEARCH_TYPE = 'similarity'
-    USE_RAG_FUSION = False
+    USE_RERANKER = True
 
     # Text splitter
     TEXT_SPLITTER_CHUNK_SIZE = 1000
@@ -88,14 +88,6 @@ class _Common:
                 temperature=XXX,
                 max_tokens=XXX
             )
-        """
-        raise NotImplementedError("You need to set a model in the config.")
-
-    @classmethod
-    def get_llm_for_rag_fusion(cls) -> BaseLanguageModel:
-        """LLM getter for RAG Fusion.
-
-        Note: RAG fusion can't use an LLM with, for example, 'LLM_MAX_TOKENS = 1'.
         """
         raise NotImplementedError("You need to set a model in the config.")
 
@@ -217,13 +209,6 @@ class _Local(_Common):
         )
 
     @classmethod
-    def get_llm_for_rag_fusion(cls) -> BaseLanguageModel:
-        return ChatOllama(
-            model='llama3.1',
-            temperature=cls.LLM_TEMPERATURE
-        )
-
-    @classmethod
     def get_embeddings(cls) -> Embeddings:
         return OllamaEmbeddings(model='nomic-embed-text')
 
@@ -236,7 +221,6 @@ class _LocalDebug(_Local):
     USE_SAMPLE = True
     SAMPLE_SIZE = 10
     RETRIEVAL_MODE = 'vs'
-    USE_RAG_FUSION = True
 
 
 class _UniudMitel3Server(_Common):

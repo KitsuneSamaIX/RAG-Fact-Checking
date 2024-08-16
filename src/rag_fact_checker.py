@@ -14,7 +14,6 @@ from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
-from rag_fusion import rag_fusion
 from retrieval import create_retriever_from_urls, create_retriever_from_vector_store
 from fact import Fact
 from prompts import get_fact_checking_prompt_template, retry_msg
@@ -40,24 +39,14 @@ class RAGFactChecker:
         """
         return cls(create_retriever_from_vector_store(vector_store))
 
-    def check(self, fact: Fact, *, classification_levels=config.CLASSIFICATION_LEVELS, use_rag_fusion=config.USE_RAG_FUSION) -> bool | None:
+    def check(self, fact: Fact) -> bool | None:
         """Checks the truthfulness of the fact using RAG.
         """
 
         # Context retrieval  # TODO: add 'date' field to query (can it be useful?)
-        if use_rag_fusion:
-            if config.VERBOSE:
-                print("Retrieving context using RAG Fusion...")
-            context_retrieval_query = " said ".join([fact.speaker, fact.text])
-            docs = rag_fusion(context_retrieval_query, self._retriever)
-            context = self._format_docs(docs)
-            print(f"LENGTH:::: {len(docs)}")  # TODO truncate!
-        else:
-            retrieval_chain = (
-                    self._retriever | self._format_docs
-            )
-            context_retrieval_query = "\n".join([fact.speaker, fact.text])
-            context = retrieval_chain.invoke(context_retrieval_query)
+        retrieval_chain = self._retriever | self._format_docs
+        context_retrieval_query = "\n".join([fact.speaker, fact.text])
+        context = retrieval_chain.invoke(context_retrieval_query)
 
         # Input data
         input_data = {
