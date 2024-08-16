@@ -25,6 +25,9 @@ def rag_fusion(original_query: str, retriever: BaseRetriever) -> list[Document]:
         prompt | config.get_llm_for_rag_fusion() | StrOutputParser() | (lambda x: x.split("\n"))
     )
 
+    if config.DEBUG:
+        print(generate_queries.invoke({'original_query': original_query}))
+
     chain = generate_queries | retriever.map() | _reciprocal_rank_fusion
 
     docs = chain.invoke({'original_query': original_query})
