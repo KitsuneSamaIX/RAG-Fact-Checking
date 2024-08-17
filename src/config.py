@@ -23,7 +23,7 @@ class _Common:  # TODO: Add a method to print all the CORE config parameters
 
     # LLM
     LLM_TEMPERATURE = 0
-    LLM_MAX_TOKENS = 1
+    LLM_MAX_TOKENS = 20
 
     # Classification levels
     #   2 -> use True/False.
