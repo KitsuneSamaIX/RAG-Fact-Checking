@@ -250,7 +250,7 @@ class _UniudMitel3Server(_Common):
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/512'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
 
-    RETRIEVAL_MODE = 'bing+vs'
+    RETRIEVAL_MODE = 'vs'
     USE_RERANKER = True
 
     HUGGING_FACE_CACHE = '/mnt/dmif-nas/SMDC/HF-Cache'
