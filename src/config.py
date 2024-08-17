@@ -16,7 +16,7 @@ from langchain.retrievers.document_compressors import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
 
-class _Common:
+class _Common:  # TODO: Add a method to print all the CORE config parameters
     # #################################
     # CORE
     # #################################
