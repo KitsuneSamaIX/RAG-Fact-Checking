@@ -255,8 +255,8 @@ class _Local(_Common):
 
 
 class _LocalDebug(_Local):
-    VERBOSE = True
-    DEBUG = True
+    # VERBOSE = True
+    # DEBUG = True
     SHOW_CONTEXT_FOR_DEBUG = False
     SHOW_PROMPT_FOR_DEBUG = False
     USE_SAMPLE = True
@@ -325,7 +325,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 # Set config class
-# config = _LocalDebug
-config = _UniudMitel3ServerDebug
+config = _LocalDebug
+# config = _UniudMitel3ServerDebug
 
 config.check()
