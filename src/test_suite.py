@@ -39,7 +39,7 @@ def run_test_suite():
         vector_store = FAISS.load_local(
             folder_path=config.ALL_EVIDENCE_VECTOR_STORE_PATH,
             embeddings=config.get_embeddings(),
-            index_name="FAISS_INDEX_CHUNK_SIZE_512",  # TODO this 512 should be a parameter
+            index_name="FAISS_INDEX_CHUNK_SIZE_1024",  # TODO the '1024' should be a parameter
             allow_dangerous_deserialization=True
         )
         fact_checker = RAGFactChecker.from_vector_store(vector_store)
