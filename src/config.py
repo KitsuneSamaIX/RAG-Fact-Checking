@@ -322,6 +322,8 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SHOW_PROMPT_FOR_DEBUG = False
     # USE_SAMPLE = True
     SAMPLE_SIZE = 100
+    TEXT_SPLITTER_CHUNK_SIZE = 512
+    TEXT_SPLITTER_CHUNK_OVERLAP = 150
 
 
 # Set config class
