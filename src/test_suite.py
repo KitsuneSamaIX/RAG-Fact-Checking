@@ -17,7 +17,7 @@ from dataset_loader import load_ground_truth_dataset, load_search_engine_results
 def run_test_suite():
     # Load datasets
     ground_truth_df = load_ground_truth_dataset()
-    if config.RETRIEVAL_MODE == 'bing+vs':
+    if config.RETRIEVAL_MODE == 'se+vs':
         search_engine_results_df = load_search_engine_results_dataset()
 
     # Gather IDs
@@ -54,8 +54,8 @@ def run_test_suite():
                 print(f"\nSpeaker: {id_data[0].speaker}")
                 print(f"Fact: {id_data[0].text}\n")
 
-            # If RETRIEVAL_MODE == 'bing+vs' then we need a new RAGFactChecker each time
-            if config.RETRIEVAL_MODE == 'bing+vs':
+            # If RETRIEVAL_MODE == 'se+vs' then we need a new RAGFactChecker each time
+            if config.RETRIEVAL_MODE == 'se+vs':
                 urls = get_search_results(id, search_engine_results_df)
                 if urls.empty:
                     raise RuntimeError(f"No URLs found for ID '{id}'.")
@@ -90,6 +90,9 @@ def run_test_suite():
 
     # Report statistics
     _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative)
+
+    # Print config
+    config.print_config()
 
 
 def _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative):

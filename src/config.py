@@ -16,7 +16,7 @@ from langchain.retrievers.document_compressors import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
 
-class _Common:  # TODO: Add a method to print all the CORE config parameters
+class _Common:
     # #################################
     # CORE
     # #################################
@@ -31,22 +31,22 @@ class _Common:  # TODO: Add a method to print all the CORE config parameters
     CLASSIFICATION_LEVELS = 2  # TODO: implement
 
     # Retrieval mode
-    #   'bing+vs'   -> retrieve N results from Bing, build a vector store from those results and then retrieve N
-    #                   documents from the vector store.
+    #   'se+vs'   -> retrieve N results from a search engine (ex. Bing), build a vector store from those results and
+    #                 then retrieve N documents from the vector store.
     #   'vs'        -> use a single vector store with all the evidence.
-    RETRIEVAL_MODE = 'bing+vs'
+    RETRIEVAL_MODE = 'se+vs'
 
     # Retrieval
     VECTOR_STORE_SEARCH_TYPE = 'similarity'
     USE_RERANKER = False
 
     # Text splitter
-    TEXT_SPLITTER_CHUNK_SIZE = 1000
-    TEXT_SPLITTER_CHUNK_OVERLAP = 200
+    TEXT_SPLITTER_CHUNK_SIZE = 1000  # Ignored when using pre-built vector stores
+    TEXT_SPLITTER_CHUNK_OVERLAP = 200  # Ignored when using pre-built vector stores
 
     # Truncated ranking
-    TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = 4  # Keep the N highest ranking docs when retrieving from search engine results.
-    TRUNCATED_RANKING_RETRIEVER_RESULTS = 6  # Keep the N highest ranking docs when retrieving from retriever results.
+    TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = 6  # Keep the N highest ranking docs when retrieving from search engine results.
+    TRUNCATED_RANKING_RETRIEVER_RESULTS = 8  # Keep the N highest ranking docs when retrieving from retriever results.
 
     # Data
     USE_SAMPLE = False  # Sample N (=SAMPLE_SIZE) IDs and the corresponding observations
@@ -205,6 +205,27 @@ class _Common:  # TODO: Add a method to print all the CORE config parameters
             if cls.CACHED_URLS_PATH is None:
                 raise RuntimeError("Configuration parameter 'CACHED_URLS_PATH' must be set.")
 
+    @classmethod
+    def print_config(cls):
+        """Prints the key configuration parameters.
+        """
+        print("\nCONFIGURATION:")
+        print(f" - LLM (model): {cls.get_llm()}")
+        print(f" - Embeddings (model): {cls.get_embeddings()}")
+        print(f" - LLM_TEMPERATURE: {cls.LLM_TEMPERATURE}")
+        print(f" - LLM_MAX_TOKENS: {cls.LLM_MAX_TOKENS}")
+        print(f" - CLASSIFICATION_LEVELS: {cls.CLASSIFICATION_LEVELS}")
+        print(f" - RETRIEVAL_MODE: {cls.RETRIEVAL_MODE}")
+        print(f" - VECTOR_STORE_SEARCH_TYPE: {cls.VECTOR_STORE_SEARCH_TYPE}")
+        print(f" - USE_RERANKER: {cls.USE_RERANKER}")
+        if cls.USE_RERANKER:
+            print(f" - Cross-Encoder (model): {cls.get_document_compressor()}")
+        if cls.RETRIEVAL_MODE == 'se+vs':
+            print(f" - TEXT_SPLITTER_CHUNK_SIZE: {cls.TEXT_SPLITTER_CHUNK_SIZE}")
+            print(f" - TEXT_SPLITTER_CHUNK_OVERLAP: {cls.TEXT_SPLITTER_CHUNK_OVERLAP}")
+            print(f" - TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS: {cls.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS}")
+        print(f" - TRUNCATED_RANKING_RETRIEVER_RESULTS: {cls.TRUNCATED_RANKING_RETRIEVER_RESULTS}")
+
 
 class _Local(_Common):
     GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
@@ -250,7 +271,7 @@ class _UniudMitel3Server(_Common):
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/512'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
 
-    RETRIEVAL_MODE = 'vs'
+    # RETRIEVAL_MODE = 'vs'
     USE_RERANKER = True
 
     HUGGING_FACE_CACHE = '/mnt/dmif-nas/SMDC/HF-Cache'
@@ -304,7 +325,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 # Set config class
-config = _LocalDebug
+# config = _LocalDebug
 config = _UniudMitel3ServerDebug
 
 config.check()
