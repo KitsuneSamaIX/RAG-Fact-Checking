@@ -260,7 +260,7 @@ class _LocalDebug(_Local):
     SHOW_CONTEXT_FOR_DEBUG = False
     SHOW_PROMPT_FOR_DEBUG = False
     USE_SAMPLE = True
-    SAMPLE_SIZE = 10
+    SAMPLE_SIZE = 4
     # RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
 

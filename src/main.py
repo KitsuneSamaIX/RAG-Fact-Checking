@@ -7,26 +7,38 @@ import time
 import pandas as pd
 from test_suite import run_test_suite
 
-
-def orchestrator():
-    # TODO implement:
-    #  - change the 'config' as needed before each run (the parameters in 'config' are not saved in modules' global variables, so their values can be changed on the fly)
-    #  - run test suite
-    #  - return a 'report' dictionary from run_test_suite (I could build the report directly inside the function _report_for_2_classification_levels)
-    #  - use the 'report' to build the visualizations (use seaborn/matplotlib)
-    pass
+from config import config
 
 
-def run():
-    print("Running test suite...")
+def orchestrator():  # TODO use the 'report' to build the visualizations (use seaborn/matplotlib)
+    reports = []
 
+    print("Running orchestrator...")
     start_time = time.time()
 
-    run_test_suite()
+    for i in [1, 5]:
+        # Update config params
+        config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = i
+        config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
+
+        # Run test suite
+        report = run()
+        reports.append(report)
 
     finish_time = (time.time() - start_time)
+    print(f"\nTOTAL ELAPSED TIME (seconds): {finish_time:.2f} ({finish_time / 60:.2f} minutes)")
 
+    df = pd.concat(reports, ignore_index=True)
+    print(df)
+
+
+def run() -> pd.DataFrame | None:
+    print("Running test suite...")
+    start_time = time.time()
+    report = run_test_suite()
+    finish_time = (time.time() - start_time)
     print(f"\nELAPSED TIME (seconds): {finish_time:.2f} ({finish_time / 60:.2f} minutes)")
+    return report
 
 
 if __name__ == '__main__':
@@ -34,7 +46,8 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', 10)
     pd.set_option('display.max_rows', 5)
 
-    run()
+    # run()
+    orchestrator()
 
 
 # TODO use proper logging lib for logging
