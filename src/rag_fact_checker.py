@@ -1,6 +1,6 @@
-"""RAG chain setup
+"""RAG Fact Checker.
 
-Composes the RAG chain.
+The RAGFactChecker class handles the RAG chain.
 """
 
 from typing import Self
@@ -15,7 +15,7 @@ from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
 from retrieval import create_retriever_from_urls, create_retriever_from_vector_store
-from fact import Fact
+from common import Fact
 from prompts import get_fact_checking_prompt_template, retry_msg
 from config import config
 

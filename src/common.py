@@ -1,3 +1,6 @@
+"""Common utilities.
+"""
+
 from dataclasses import dataclass
 
 

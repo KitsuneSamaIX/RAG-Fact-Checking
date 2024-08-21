@@ -1,4 +1,4 @@
-"""Evidence retrieval
+"""Evidence retrieval.
 """
 
 import os

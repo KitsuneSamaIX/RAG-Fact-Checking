@@ -1,6 +1,6 @@
-"""Main
+"""Main module.
 
-This is the entrypoint of my RAG for Fake News App.
+This is the entrypoint of the app.
 """
 
 import time

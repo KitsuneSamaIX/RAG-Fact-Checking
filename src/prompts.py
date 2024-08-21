@@ -1,6 +1,6 @@
-"""Prompts
+"""Prompts.
 
-The prompts are defined here.
+The main prompts are defined here.
 """
 
 from langchain_core.prompts import ChatPromptTemplate

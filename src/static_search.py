@@ -1,4 +1,4 @@
-"""Static search module
+"""Static search module.
 
 Searches on static scraped data.
 """

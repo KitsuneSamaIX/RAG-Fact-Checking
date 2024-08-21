@@ -1,4 +1,4 @@
-"""Test suite
+"""Test suite.
 
 Executes tests and produces statistics.
 """
@@ -8,7 +8,7 @@ import pandas as pd
 from langchain_community.vectorstores import FAISS
 
 from static_search import get_search_results
-from fact import Fact
+from common import Fact
 from rag_fact_checker import RAGFactChecker
 from config import config
 from dataset_loader import load_ground_truth_dataset, load_search_engine_results_dataset

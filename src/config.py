@@ -1,4 +1,4 @@
-"""Configuration file
+"""Centralized configuration.
 
 Note: keep sensitive data (like API keys) in environment variables.
 """
