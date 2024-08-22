@@ -53,3 +53,4 @@ if __name__ == '__main__':
 # TODO use proper logging lib for logging
 # TODO use rerank across different embeddings sizes (as seen on https://aman.ai/primers/ai/RAG/#figuring-out-the-ideal-chunk-size)
 # TODO fix embeddings error bug
+# TODO gitignore .idea
