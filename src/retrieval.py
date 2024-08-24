@@ -75,6 +75,11 @@ def _create_vector_store_from_urls(urls: pd.Series) -> VectorStore:
         print("Building the vector store...")
 
     # Create a vector store from all the docs
-    vector_store = FAISS.from_documents(result_docs, config.get_embeddings())
+    try:
+        vector_store = FAISS.from_documents(result_docs, config.get_embeddings())
+    except Exception as e:
+        print(f"WARNING: an exception occurred while building the vector store. {e}")
+        print("Retrying...")
+        vector_store = FAISS.from_documents(result_docs, config.get_embeddings())
 
     return vector_store

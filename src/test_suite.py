@@ -1,6 +1,6 @@
 """Test suite.
 
-Executes tests and produces statistics.
+Run tests and produce reports.
 """
 
 import pandas as pd
@@ -12,6 +12,7 @@ from common import Fact
 from rag_fact_checker import RAGFactChecker
 from config import config
 from dataset_loader import load_ground_truth_dataset, load_search_engine_results_dataset
+from reports import report_for_2_classification_levels
 
 
 def run_test_suite() -> pd.DataFrame | None:
@@ -88,66 +89,22 @@ def run_test_suite() -> pd.DataFrame | None:
             n_done += 1
             print(f"\n\nEXECUTION PROGRESS: done {n_done}/{n_total} ({(n_done / n_total) * 100:.2f}%)")
 
-    # Report statistics
-    report = _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative)
+    # Report
+    print("\n\n\n\nREPORT:")
+    if n_total == n_error:
+        print("All ID checks have been aborted due to errors! Check code or network configuration.")
+        report = None
+    else:
+        print(f"Checked IDs: {n_total}")
+        print(f"Correct answers: {n_correct} ({(n_correct / n_total) * 100:.2f}%)")
+        print(f"ID checks aborted due to errors: {n_error}")
+        if config.CLASSIFICATION_LEVELS == 2:
+            report = report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative)
 
     # Print config
     config.print_config()
 
     return report
-
-
-def _report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative) -> pd.DataFrame | None:
-    # Report statistics
-    print("\n\n\n\nREPORT:")
-    if n_total == n_error:
-        print("All ID checks have been aborted due to errors! Check code or network configuration.")
-        return None
-    else:
-        print(f"Checked IDs: {n_total}")
-        print(f"Correct answers: {n_correct} ({(n_correct / n_total) * 100:.2f}%)")
-        print(f"ID checks aborted due to errors: {n_error}")
-        print("\nMETRICS (excluding aborted checks):")
-
-        # Compute metrics
-        try:
-            accuracy = n_correct / (n_total - n_error)
-        except ZeroDivisionError:
-            accuracy = float('NaN')
-        try:
-            precision = n_true_positive / (n_true_positive + n_false_positive)
-        except ZeroDivisionError:
-            precision = float('NaN')
-        try:
-            recall = n_true_positive / (n_true_positive + n_false_negative)
-        except ZeroDivisionError:
-            recall = float('NaN')
-        try:
-            f1 = 2 * ((precision * recall) / (precision + recall))
-        except ZeroDivisionError:
-            f1 = float('NaN')
-
-        # Round numbers
-        keep_digits = 2
-        accuracy = round(accuracy, keep_digits)
-        precision = round(precision, keep_digits)
-        recall = round(recall, keep_digits)
-        f1 = round(f1, keep_digits)
-
-        # Log metrics
-        print(f"Accuracy: {accuracy}")
-        print(f"Precision: {precision}")
-        print(f"Recall: {recall}")
-        print(f"F1: {f1}")
-
-        # Return report
-        report_data = {
-            'accuracy': [accuracy],
-            'precision': [precision],
-            'recall': [recall],
-            'f1': [f1]
-        }
-        return pd.DataFrame(report_data)
 
 
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:

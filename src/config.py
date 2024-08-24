@@ -168,7 +168,8 @@ class _Common:
     ALL_EVIDENCE_VECTOR_STORE_PATH = None  # Location of the vector store containing all evidence
 
     # Other data locations
-    HUGGING_FACE_CACHE = None
+    HUGGING_FACE_CACHE_PATH = None
+    RESULTS_PATH = None  # Location where to output tests' results
 
     # #################################
     # CODE
@@ -205,6 +206,9 @@ class _Common:
             if cls.CACHED_URLS_PATH is None:
                 raise RuntimeError("Configuration parameter 'CACHED_URLS_PATH' must be set.")
 
+        if cls.RESULTS_PATH is None:
+            raise RuntimeError("Configuration parameter 'RESULTS_PATH' must be set.")
+
     @classmethod
     def print_config(cls):
         """Prints the key configuration parameters.
@@ -230,8 +234,9 @@ class _Common:
 class _Local(_Common):
     GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024' # TODO use other chunk sizes 512, 1024, etc
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'  # TODO use other chunk sizes 512, 1024, etc
     CACHED_URLS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/evidence_to_index'
+    RESULTS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Results'
 
     @classmethod
     def get_llm(cls) -> BaseLanguageModel:
@@ -270,11 +275,11 @@ class _UniudMitel3Server(_Common):
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/1024'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
+    HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
+    RESULTS_PATH = '~/RAG-Fact-Checking/Results'
 
     # RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
-
-    HUGGING_FACE_CACHE = '/mnt/dmif-nas/SMDC/HF-Cache'
 
     # @classmethod
     # def get_llm(cls) -> BaseLanguageModel:  # vllm (it mimics the OpenAI API)
@@ -301,7 +306,7 @@ class _UniudMitel3Server(_Common):
                 model_name='sentence-transformers/all-mpnet-base-v2',
                 model_kwargs={'device': 0},
                 encode_kwargs={'normalize_embeddings': True},
-                cache_folder=cls.HUGGING_FACE_CACHE
+                cache_folder=cls.HUGGING_FACE_CACHE_PATH
             )
         else:
             return OllamaEmbeddings(model='nomic-embed-text')
