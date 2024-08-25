@@ -276,7 +276,7 @@ class _UniudMitel3Server(_Common):
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/1024'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
     HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
-    RESULTS_PATH = '~/results/RAG-Fact-Checking/'
+    RESULTS_PATH = '/home/fedrigo/results/RAG-Fact-Checking/'
 
     # @classmethod
     # def get_llm(cls) -> BaseLanguageModel:  # vllm (it mimics the OpenAI API)
