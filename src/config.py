@@ -262,8 +262,8 @@ class _Local(_Common):
 class _LocalDebug(_Local):
     # VERBOSE = True
     # DEBUG = True
-    SHOW_CONTEXT_FOR_DEBUG = False
-    SHOW_PROMPT_FOR_DEBUG = False
+    # SHOW_CONTEXT_FOR_DEBUG = True
+    # SHOW_PROMPT_FOR_DEBUG = True
     USE_SAMPLE = True
     SAMPLE_SIZE = 4
     # RETRIEVAL_MODE = 'vs'
@@ -276,10 +276,7 @@ class _UniudMitel3Server(_Common):
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/1024'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
     HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
-    RESULTS_PATH = '~/RAG-Fact-Checking/Results'
-
-    # RETRIEVAL_MODE = 'vs'
-    # USE_RERANKER = True
+    RESULTS_PATH = '~/results/RAG-Fact-Checking/'
 
     # @classmethod
     # def get_llm(cls) -> BaseLanguageModel:  # vllm (it mimics the OpenAI API)
@@ -321,16 +318,18 @@ class _UniudMitel3Server(_Common):
 
 
 class _UniudMitel3ServerDebug(_UniudMitel3Server):
-    VERBOSE = True
-    DEBUG = True
-    SHOW_CONTEXT_FOR_DEBUG = False
-    SHOW_PROMPT_FOR_DEBUG = False
+    # VERBOSE = True
+    # DEBUG = True
+    # SHOW_CONTEXT_FOR_DEBUG = True
+    # SHOW_PROMPT_FOR_DEBUG = True
     # USE_SAMPLE = True
     SAMPLE_SIZE = 100
+    # RETRIEVAL_MODE = 'vs'
+    # USE_RERANKER = True
 
 
 # Set config class
-config = _LocalDebug
-# config = _UniudMitel3ServerDebug
+# config = _LocalDebug
+config = _UniudMitel3ServerDebug
 
 config.check()
