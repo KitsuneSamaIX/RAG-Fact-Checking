@@ -45,7 +45,8 @@ def report_for_2_classification_levels(n_total, n_correct, n_error, n_true_posit
         'accuracy': [accuracy],
         'precision': [precision],
         'recall': [recall],
-        'f1': [f1]
+        'f1': [f1],
+        'n_error': [n_error]  # Add number of errors to the report
     }
     _add_config_data(report_data)
     return pd.DataFrame(report_data)
