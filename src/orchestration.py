@@ -17,8 +17,8 @@ def run_orchestrator():  # TODO use the 'report' to build the visualizations (us
     print("Running orchestrator...")
     start_time = time.time()
 
-    # for i in [1, 5, 10]:
-    for i in range(1, 10):
+    for i in [1, 5]:
+    # for i in range(1, 10):
         # Update config params
         config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = i
         config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
