@@ -11,7 +11,7 @@ from test_suite import run_test_suite
 from config import config
 
 
-def run_orchestrator():  # TODO use the 'report' to build the visualizations (use seaborn/matplotlib)
+def run_orchestrator():
     reports = []
 
     print("Running orchestrator...")
