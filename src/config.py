@@ -28,7 +28,7 @@ class _Common:
     # Classification levels
     #   2 -> use True/False.
     #   6 -> use all 6 levels of the TRUTH-O-METER labels of "politifact.com".
-    CLASSIFICATION_LEVELS = 2  # TODO: implement
+    CLASSIFICATION_LEVELS = 2
 
     # Retrieval mode
     #   'se+vs'   -> retrieve N results from a search engine (ex. Bing), build a vector store from those results and
@@ -260,14 +260,15 @@ class _Local(_Common):
 
 
 class _LocalDebug(_Local):
-    # VERBOSE = True
-    # DEBUG = True
+    VERBOSE = True
+    DEBUG = True
     # SHOW_CONTEXT_FOR_DEBUG = True
     # SHOW_PROMPT_FOR_DEBUG = True
     USE_SAMPLE = True
     SAMPLE_SIZE = 4
     # RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
+    CLASSIFICATION_LEVELS = 6
 
 
 class _UniudMitel3Server(_Common):
@@ -326,10 +327,11 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SAMPLE_SIZE = 100
     # RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
+    CLASSIFICATION_LEVELS = 6
 
 
 # Set config class
-# config = _LocalDebug
-config = _UniudMitel3ServerDebug
+config = _LocalDebug
+# config = _UniudMitel3ServerDebug
 
 config.check()

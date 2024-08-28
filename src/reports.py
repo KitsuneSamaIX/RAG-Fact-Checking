@@ -1,60 +1,157 @@
 """Functions to compute reports.
 """
 
+from abc import ABC, abstractmethod
+
 import pandas as pd
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, mean_absolute_error
+import numpy as np
+
 from config import config
 
 
-def report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative) -> pd.DataFrame:
-    """Returns a DataFrame with a single row and multiple columns.
-    """
-    print("\nMETRICS (excluding aborted checks):")
-    # Compute metrics
-    try:
-        accuracy = n_correct / (n_total - n_error)
-    except ZeroDivisionError:
-        accuracy = float('NaN')
-    try:
-        precision = n_true_positive / (n_true_positive + n_false_positive)
-    except ZeroDivisionError:
-        precision = float('NaN')
-    try:
-        recall = n_true_positive / (n_true_positive + n_false_negative)
-    except ZeroDivisionError:
-        recall = float('NaN')
-    try:
-        f1 = 2 * ((precision * recall) / (precision + recall))
-    except ZeroDivisionError:
-        f1 = float('NaN')
+class ReportBuilder(ABC):
 
-    # Round numbers
-    keep_digits = 2
-    accuracy = round(accuracy, keep_digits)
-    precision = round(precision, keep_digits)
-    recall = round(recall, keep_digits)
-    f1 = round(f1, keep_digits)
+    def __init__(self):
+        self._n_total = 0
+        self._n_correct = 0
+        self._n_error = 0
+        self._n_undefined_prediction = 0
 
-    # Log metrics
-    print(f"Accuracy: {accuracy}")
-    print(f"Precision: {precision}")
-    print(f"Recall: {recall}")
-    print(f"F1: {f1}")
+        self._targets = []
+        self._predictions = []
 
-    # Return report
-    report_data = {
-        'accuracy': [accuracy],
-        'precision': [precision],
-        'recall': [recall],
-        'f1': [f1],
-        'n_error': [n_error]  # Add number of errors to the report
-    }
-    _add_config_data(report_data)
-    return pd.DataFrame(report_data)
+        self._keep_digits = 2
+
+    @property
+    def n_total(self):
+        return self._n_total
+
+    @property
+    def n_correct(self):
+        return self._n_correct
+
+    @property
+    def n_error(self):
+        return self._n_error
+
+    @property
+    def n_undefined_prediction(self):
+        return self._n_undefined_prediction
+
+    @abstractmethod
+    def build(self) -> pd.DataFrame:
+        """Builds the report.
+
+        A report consists in a single row of a DataFrame with multiple columns, it summarizes the performance of the system,
+         with a certain configuration, compared to the ground truth.
+
+        Returns a DataFrame with a single row and multiple columns.
+        """
+        pass
+
+    def add_error(self):
+        """Increases error count by 1.
+
+        Call this when a test fails with some exception.
+        """
+        self._n_total += 1
+        self._n_error += 1
+
+    def add_result(self, target, prediction):
+        """Adds a single result to the report.
+        """
+        self._n_total += 1
+
+        if target is None:
+            raise RuntimeError("The target cannot be None.")
+
+        if prediction is None:
+            self._n_undefined_prediction += 1
+            return
+
+        if target == prediction:
+            self._n_correct += 1
+
+        # Save result
+        self._targets.append(target)
+        self._predictions.append(prediction)
+        assert len(self._targets) == len(self._predictions)
+
+    def are_all_errors(self) -> bool:
+        return self._n_total == self._n_error
+
+    @staticmethod
+    def _add_config_data(report: dict):
+        report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = [config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS]
+        report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = [config.TRUNCATED_RANKING_RETRIEVER_RESULTS]
+        report['CLASSIFICATION_LEVELS'] = [config.CLASSIFICATION_LEVELS]
+        report['RETRIEVAL_MODE'] = [config.RETRIEVAL_MODE]
+        report['USE_RERANKER'] = [config.USE_RERANKER]
 
 
-def _add_config_data(report: dict):
-    report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = [config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS]
-    report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = [config.TRUNCATED_RANKING_RETRIEVER_RESULTS]
-    report['CLASSIFICATION_LEVELS'] = [config.CLASSIFICATION_LEVELS]
-    report['RETRIEVAL_MODE'] = [config.RETRIEVAL_MODE]
-    report['USE_RERANKER'] = [config.USE_RERANKER]
+class ReportBuilderFor2ClassificationLevels(ReportBuilder):
+
+    def build(self) -> pd.DataFrame:
+        print("\nMETRICS (excluding aborted checks):")
+        # Compute metrics
+        accuracy = accuracy_score(self._targets, self._predictions)
+        precision = precision_score(self._targets, self._predictions, pos_label=True, average='binary', zero_division=np.nan)
+        recall = recall_score(self._targets, self._predictions, pos_label=True, average='binary', zero_division=np.nan)
+        f1 = f1_score(self._targets, self._predictions, pos_label=True, average='binary', zero_division=np.nan)
+
+        # Round numbers
+        accuracy = round(accuracy, self._keep_digits)
+        precision = round(precision, self._keep_digits)
+        recall = round(recall, self._keep_digits)
+        f1 = round(f1, self._keep_digits)
+
+        # Log metrics
+        print(f"Accuracy: {accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"F1: {f1}")
+
+        # Return report
+        report_data = {
+            'accuracy': [accuracy],
+            'precision': [precision],
+            'recall': [recall],
+            'f1': [f1],
+            'n_error': [self._n_error]  # Add number of errors to the report
+        }
+        self._add_config_data(report_data)
+        return pd.DataFrame(report_data)
+
+
+class ReportBuilderFor6ClassificationLevels(ReportBuilder):
+
+    def build(self) -> pd.DataFrame:  # TODO work in progress
+        print("\nMETRICS (excluding aborted checks):")
+        # Compute metrics
+        accuracy = accuracy_score(self._targets, self._predictions)
+        mse = mean_squared_error(self._targets, self._predictions)
+        mae = mean_absolute_error(self._targets, self._predictions)
+
+        # Round numbers
+        accuracy = round(accuracy, self._keep_digits)
+        mse = round(mse, self._keep_digits)
+        mae = round(mae, self._keep_digits)
+
+        # Log metrics
+        print(f"Accuracy: {accuracy}")
+        print(f"MSE: {mse}")
+        print(f"MAE: {mae}")
+
+        # Return report
+        report_data = {
+            'accuracy': [accuracy],
+            'mse': [mse],
+            'mae': [mae],
+            'n_error': [self._n_error]  # Add number of errors to the report
+        }
+        self._add_config_data(report_data)
+        return pd.DataFrame(report_data)
+
+
+# TODO (for 6 class levels) precision, recall and f1 have to be done by class (see: https://www.evidentlyai.com/classification-metrics/multi-class-metrics)

@@ -11,6 +11,9 @@ faiss-cpu >= 1.8.0
 
 pandas >= 2.2.2
 
+scikit-learn >= 1.5.1
+numpy >= 1.26.4
+
 # To upgrade all requirements (and their dependencies) to the latest version:
 # pip install -r requirements.txt --upgrade --upgrade-strategy eager
 

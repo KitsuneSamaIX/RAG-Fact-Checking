@@ -16,7 +16,7 @@ from langchain_core.retrievers import BaseRetriever
 
 from retrieval import create_retriever_from_urls, create_retriever_from_vector_store
 from common import Fact
-from prompts import get_fact_checking_prompt_template, retry_msg
+from prompts import get_fact_checking_prompt_template, get_retry_msg
 from config import config
 
 
@@ -39,8 +39,10 @@ class RAGFactChecker:
         """
         return cls(create_retriever_from_vector_store(vector_store))
 
-    def check(self, fact: Fact) -> bool | None:
+    def check(self, fact: Fact) -> bool | int | None:
         """Checks the truthfulness of the fact using RAG.
+
+        Note: returns None when the LLM response cannot be parsed.
         """
 
         # Context retrieval  # TODO: add 'date' field to query (can it be useful?)
@@ -77,16 +79,25 @@ class RAGFactChecker:
         # Invoke the chain
         response = rag_chain.invoke(input_data)
 
+        # Set good responses
+        match config.CLASSIFICATION_LEVELS:
+            case 2:
+                good_responses = ["TRUE", "FALSE"]
+            case 6:
+                good_responses = range(0, 6)
+            case _:
+                raise ValueError()
+
         # Validate the response
-        if response not in ["TRUE", "FALSE"]:
+        if response not in good_responses:
             if config.DEBUG:
-                print(f"\nRECEIVED NON BINARY RESPONSE:\n{response}\n")
+                print(f"\nRECEIVED BAD RESPONSE:\n{response}\n")
             if config.VERBOSE:
-                print("Non binary response, retrying...")
+                print("Bad response, retrying...")
 
             retry_prompt = get_fact_checking_prompt_template()
             retry_prompt.append(("ai", response))
-            retry_prompt.append(("human", retry_msg))
+            retry_prompt.append(("human", get_retry_msg()))
 
             rag_chain = (
                     retry_prompt
@@ -106,10 +117,31 @@ class RAGFactChecker:
         return "\n\n".join(doc.page_content for doc in docs)
 
     @staticmethod
-    def _response_parser(response: str) -> bool | None:
-        if re.match(r".*TRUE.*", response, re.IGNORECASE):
+    def _response_parser(response: str) -> bool | int | None:
+        match config.CLASSIFICATION_LEVELS:
+            case 2:
+                return RAGFactChecker._response_parser_for_2_classification_levels(response)
+            case 6:
+                return RAGFactChecker._response_parser_for_6_classification_levels(response)
+            case _:
+                raise ValueError()
+
+    @staticmethod
+    def _response_parser_for_2_classification_levels(response: str) -> bool | None:
+        if re.match(r'.*TRUE.*', response, re.IGNORECASE):
             return True
-        elif re.match(r".*FALSE.*", response, re.IGNORECASE):
+        elif re.match(r'.*FALSE.*', response, re.IGNORECASE):
             return False
         else:
             return None
+
+    @staticmethod
+    def _response_parser_for_6_classification_levels(response: str) -> int | None:
+        match = re.search(r'\d+', response)
+
+        if match:
+            res = int(match.group())
+            if res in range(0, 6):
+                return res
+
+        return None

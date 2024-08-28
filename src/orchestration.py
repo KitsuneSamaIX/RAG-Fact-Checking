@@ -31,8 +31,8 @@ def run_orchestrator():
     print(f"\nTOTAL ELAPSED TIME (seconds): {finish_time:.2f} ({finish_time / 60:.2f} minutes)")
 
     df = pd.concat(reports, ignore_index=True)
-    _save_results(df)
     print(df)
+    _save_results(df)
 
 
 def _save_results(df: pd.DataFrame):

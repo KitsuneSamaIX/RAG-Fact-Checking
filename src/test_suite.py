@@ -12,7 +12,7 @@ from common import Fact
 from rag_fact_checker import RAGFactChecker
 from config import config
 from dataset_loader import load_ground_truth_dataset, load_search_engine_results_dataset
-from reports import report_for_2_classification_levels
+from reports import ReportBuilderFor2ClassificationLevels, ReportBuilderFor6ClassificationLevels
 
 
 def run_test_suite() -> pd.DataFrame | None:
@@ -25,15 +25,17 @@ def run_test_suite() -> pd.DataFrame | None:
     ids = ground_truth_df.index.to_series()
 
     # Track execution progress
+    n_total = len(ids)
     n_done = 0
 
-    # Initialize statistics
-    n_total = len(ids)
-    n_correct = 0
-    n_error = 0
-    n_true_positive = 0
-    n_false_positive = 0
-    n_false_negative = 0
+    # Initialize ReportBuilder
+    match config.CLASSIFICATION_LEVELS:
+        case 2:
+            rb = ReportBuilderFor2ClassificationLevels()
+        case 6:
+            rb = ReportBuilderFor6ClassificationLevels()
+        case _:
+            raise ValueError()
 
     # If RETRIEVAL_MODE == 'vs' then we can keep using the same RAGFactChecker
     if config.RETRIEVAL_MODE == 'vs':
@@ -62,28 +64,24 @@ def run_test_suite() -> pd.DataFrame | None:
                     raise RuntimeError(f"No URLs found for ID '{id}'.")
                 fact_checker = RAGFactChecker.from_urls(urls)
 
-            res = fact_checker.check(id_data[0])
+            pred = fact_checker.check(id_data[0])
 
-            target = _target_to_bool(id_data[1])
+            match config.CLASSIFICATION_LEVELS:
+                case 2:
+                    target = _target_to_bool(id_data[1])
+                case 6:
+                    target = id_data[1]
+                case _:
+                    raise ValueError()
 
             if config.VERBOSE:
                 print(f"\nThe target is: {target}\n")
 
-            if res == target:
-                n_correct += 1
-
-            if res is True and target is True:
-                n_true_positive += 1
-
-            if res is True and target is False:
-                n_false_positive += 1
-
-            if res is False and target is True:
-                n_false_negative += 1
+            rb.add_result(target, pred)
 
         except Exception as e:
             print(f"WARNING: an exception occurred while checking the ID {id}. {e}")
-            n_error += 1
+            rb.add_error()
 
         finally:
             n_done += 1
@@ -91,15 +89,15 @@ def run_test_suite() -> pd.DataFrame | None:
 
     # Report
     print("\n\n\n\nREPORT:")
-    if n_total == n_error:
+    if rb.are_all_errors():
         print("All ID checks have been aborted due to errors! Check code or network configuration.")
         report = None
     else:
-        print(f"Checked IDs: {n_total}")
-        print(f"Correct answers: {n_correct} ({(n_correct / n_total) * 100:.2f}%)")
-        print(f"ID checks aborted due to errors: {n_error}")
-        if config.CLASSIFICATION_LEVELS == 2:
-            report = report_for_2_classification_levels(n_total, n_correct, n_error, n_true_positive, n_false_positive, n_false_negative)
+        print(f"Checked IDs: {rb.n_total}")
+        print(f"Correct answers: {rb.n_correct} ({(rb.n_correct / rb.n_total) * 100:.2f}%)")
+        print(f"ID checks aborted due to errors: {rb.n_error}")
+        print(f"ID checks completed with undefined predictions: {rb.n_undefined_prediction}")
+        report = rb.build()
 
     # Print config
     config.print_config()
