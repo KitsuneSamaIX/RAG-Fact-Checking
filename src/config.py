@@ -210,31 +210,41 @@ class _Common:
             raise RuntimeError("Configuration parameter 'RESULTS_PATH' must be set.")
 
     @classmethod
+    def get_printable_config(cls) -> str:
+        """Returns a printable text of the key configuration parameters.
+        """
+        lines = []
+        lines.append("\nCONFIGURATION:")
+        lines.append(f" - LLM (model): {cls.get_llm()}")
+        lines.append(f" - Embeddings (model): {cls.get_embeddings()}")
+        lines.append(f" - LLM_TEMPERATURE: {cls.LLM_TEMPERATURE}")
+        lines.append(f" - LLM_MAX_TOKENS: {cls.LLM_MAX_TOKENS}")
+        lines.append(f" - CLASSIFICATION_LEVELS: {cls.CLASSIFICATION_LEVELS}")
+        lines.append(f" - RETRIEVAL_MODE: {cls.RETRIEVAL_MODE}")
+        lines.append(f" - VECTOR_STORE_SEARCH_TYPE: {cls.VECTOR_STORE_SEARCH_TYPE}")
+        lines.append(f" - USE_RERANKER: {cls.USE_RERANKER}")
+        if cls.USE_RERANKER:
+            lines.append(f" - Cross-Encoder (model): {cls.get_document_compressor()}")
+        if cls.RETRIEVAL_MODE == 'se+vs':
+            lines.append(f" - TEXT_SPLITTER_CHUNK_SIZE: {cls.TEXT_SPLITTER_CHUNK_SIZE}")
+            lines.append(f" - TEXT_SPLITTER_CHUNK_OVERLAP: {cls.TEXT_SPLITTER_CHUNK_OVERLAP}")
+            lines.append(f" - TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS: {cls.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS}")
+        lines.append(f" - TRUNCATED_RANKING_RETRIEVER_RESULTS: {cls.TRUNCATED_RANKING_RETRIEVER_RESULTS}")
+        text = '\n'.join(lines)
+        return text
+
+    @classmethod
     def print_config(cls):
         """Prints the key configuration parameters.
         """
-        print("\nCONFIGURATION:")
-        print(f" - LLM (model): {cls.get_llm()}")
-        print(f" - Embeddings (model): {cls.get_embeddings()}")
-        print(f" - LLM_TEMPERATURE: {cls.LLM_TEMPERATURE}")
-        print(f" - LLM_MAX_TOKENS: {cls.LLM_MAX_TOKENS}")
-        print(f" - CLASSIFICATION_LEVELS: {cls.CLASSIFICATION_LEVELS}")
-        print(f" - RETRIEVAL_MODE: {cls.RETRIEVAL_MODE}")
-        print(f" - VECTOR_STORE_SEARCH_TYPE: {cls.VECTOR_STORE_SEARCH_TYPE}")
-        print(f" - USE_RERANKER: {cls.USE_RERANKER}")
-        if cls.USE_RERANKER:
-            print(f" - Cross-Encoder (model): {cls.get_document_compressor()}")
-        if cls.RETRIEVAL_MODE == 'se+vs':
-            print(f" - TEXT_SPLITTER_CHUNK_SIZE: {cls.TEXT_SPLITTER_CHUNK_SIZE}")
-            print(f" - TEXT_SPLITTER_CHUNK_OVERLAP: {cls.TEXT_SPLITTER_CHUNK_OVERLAP}")
-            print(f" - TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS: {cls.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS}")
-        print(f" - TRUNCATED_RANKING_RETRIEVER_RESULTS: {cls.TRUNCATED_RANKING_RETRIEVER_RESULTS}")
+        print(cls.get_printable_config())
 
 
 class _Local(_Common):
     GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'  # TODO use other chunk sizes 512, 1024, etc
+    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'  # TODO use other chunk sizes 512, 1024, etc
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
     CACHED_URLS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/evidence_to_index'
     RESULTS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Results'
 
@@ -275,7 +285,7 @@ class _UniudMitel3Server(_Common):
     GROUND_TRUTH_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/ground_truth.csv'
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
     # ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/1024'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano/embeddings/faiss_nomic_embed_text_1000/'
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
     HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
     RESULTS_PATH = '/home/fedrigo/results/RAG-Fact-Checking/'
@@ -301,12 +311,13 @@ class _UniudMitel3Server(_Common):
     @classmethod
     def get_embeddings(cls) -> Embeddings:
         if cls.RETRIEVAL_MODE == 'vs':
-            return HuggingFaceEmbeddings(
-                model_name='sentence-transformers/all-mpnet-base-v2',
-                model_kwargs={'device': 0},
-                encode_kwargs={'normalize_embeddings': True},
-                cache_folder=cls.HUGGING_FACE_CACHE_PATH
-            )
+            # return HuggingFaceEmbeddings(
+            #     model_name='sentence-transformers/all-mpnet-base-v2',
+            #     model_kwargs={'device': 0},
+            #     encode_kwargs={'normalize_embeddings': True},
+            #     cache_folder=cls.HUGGING_FACE_CACHE_PATH
+            # )
+            return OllamaEmbeddings(model='nomic-embed-text')
         else:
             return OllamaEmbeddings(model='nomic-embed-text')
 
@@ -328,11 +339,11 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SAMPLE_SIZE = 100
     # RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
-    CLASSIFICATION_LEVELS = 2
+    CLASSIFICATION_LEVELS = 6
 
 
 # Set config class
-# config = _LocalDebug
-config = _UniudMitel3ServerDebug
+config = _LocalDebug
+# config = _UniudMitel3ServerDebug
 
 config.check()

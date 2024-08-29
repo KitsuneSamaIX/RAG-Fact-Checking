@@ -12,11 +12,13 @@ from config import config
 
 
 def run_orchestrator():
+    print("Running orchestrator...")
+
+    # Initialize vars
     reports = []
     raw_data = []
-
-    print("Running orchestrator...")
     start_time = time.time()
+    output_folder_path = _create_output_folder()
 
     # for i in [1, 3]:
     for i in range(1, 11):
@@ -35,19 +37,36 @@ def run_orchestrator():
     # Save report
     report_df = pd.concat(reports, ignore_index=True)
     print(report_df)
-    _save_results(report_df, 'metrics.csv')
+    _save_dataframe(report_df, output_folder_path, 'metrics.csv')
 
     # Save raw data
     raw_data_df = pd.concat(raw_data, ignore_index=True)
-    _save_results(raw_data_df, 'raw_data.csv')
+    _save_dataframe(raw_data_df, output_folder_path, 'raw_data.csv')
+
+    # Save the last config
+    config_text = ("IMPORTANT NOTE: this is a snapshot of the last used configuration during tests,"
+                   " be sure to check which of the following parameters have been varied during tests.\n\n") + config.get_printable_config()
+    _save_text(config_text, output_folder_path, 'config.txt')
 
 
-def _save_results(df: pd.DataFrame, file_name: str):
-    timestamp = time.strftime('%Y%m%d-%H%M%S-UTC', time.gmtime())
-    file_folder_path = os.path.join(config.RESULTS_PATH, timestamp)
-    os.makedirs(file_folder_path, exist_ok=True)  # Create the folder if it doesn't exist
-    file_path = os.path.join(file_folder_path, file_name)
+def _save_dataframe(df: pd.DataFrame, output_folder_path: str, file_name: str):
+    file_path = os.path.join(output_folder_path, file_name)
     df.to_csv(file_path)
+
+
+def _save_text(text: str, output_folder_path: str, file_name: str):
+    file_path = os.path.join(output_folder_path, file_name)
+    with open(file_path, 'w') as file:
+        file.write(text)
+
+
+def _create_output_folder() -> str:
+    """Returns the path of the output folder created.
+    """
+    timestamp = time.strftime('%Y%m%d-%H%M%S-UTC', time.gmtime())
+    folder_path = os.path.join(config.RESULTS_PATH, timestamp)
+    os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
+    return folder_path
 
 
 def run_test() -> tuple[pd.DataFrame, pd.DataFrame] | None:

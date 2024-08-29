@@ -39,10 +39,16 @@ def run_test_suite() -> tuple[pd.DataFrame, pd.DataFrame] | None:
 
     # If RETRIEVAL_MODE == 'vs' then we can keep using the same RAGFactChecker
     if config.RETRIEVAL_MODE == 'vs':
+        # vector_store = FAISS.load_local(
+        #     folder_path=config.ALL_EVIDENCE_VECTOR_STORE_PATH,
+        #     embeddings=config.get_embeddings(),
+        #     index_name="FAISS_INDEX_CHUNK_SIZE_1024",  # TODO the '1024' should be a parameter
+        #     allow_dangerous_deserialization=True
+        # )
         vector_store = FAISS.load_local(
             folder_path=config.ALL_EVIDENCE_VECTOR_STORE_PATH,
             embeddings=config.get_embeddings(),
-            index_name="FAISS_INDEX_CHUNK_SIZE_1024",  # TODO the '1024' should be a parameter
+            index_name='index',
             allow_dangerous_deserialization=True
         )
         fact_checker = RAGFactChecker.from_vector_store(vector_store)
