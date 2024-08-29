@@ -21,7 +21,7 @@ def run_orchestrator():
     # for i in [1, 3]:
     for i in range(1, 11):
         # Update config params
-        config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = i
+        config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = 10
         config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
 
         # Run test suite
