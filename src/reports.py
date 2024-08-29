@@ -126,7 +126,7 @@ class ReportBuilderFor2ClassificationLevels(ReportBuilder):
 
 class ReportBuilderFor6ClassificationLevels(ReportBuilder):
 
-    def build(self) -> pd.DataFrame:  # TODO work in progress
+    def build(self) -> pd.DataFrame:
         print("\nMETRICS (excluding aborted checks):")
         # Compute metrics
         accuracy = accuracy_score(self._targets, self._predictions)
