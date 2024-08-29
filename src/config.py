@@ -331,7 +331,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 # Set config class
-config = _LocalDebug
-# config = _UniudMitel3ServerDebug
+# config = _LocalDebug
+config = _UniudMitel3ServerDebug
 
 config.check()
