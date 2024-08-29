@@ -15,7 +15,7 @@ from dataset_loader import load_ground_truth_dataset, load_search_engine_results
 from reports import ReportBuilderFor2ClassificationLevels, ReportBuilderFor6ClassificationLevels
 
 
-def run_test_suite() -> pd.DataFrame | None:
+def run_test_suite() -> tuple[pd.DataFrame, pd.DataFrame] | None:
     # Load datasets
     ground_truth_df = load_ground_truth_dataset()
     if config.RETRIEVAL_MODE == 'se+vs':
@@ -92,17 +92,19 @@ def run_test_suite() -> pd.DataFrame | None:
     if rb.are_all_errors():
         print("All ID checks have been aborted due to errors! Check code or network configuration.")
         report = None
+        raw_data = None
     else:
         print(f"Checked IDs: {rb.n_total}")
         print(f"Correct answers: {rb.n_correct} ({(rb.n_correct / rb.n_total) * 100:.2f}%)")
         print(f"ID checks aborted due to errors: {rb.n_error}")
         print(f"ID checks completed with undefined predictions: {rb.n_undefined_prediction}")
         report = rb.build()
+        raw_data = rb.get_raw_data()
 
     # Print config
     config.print_config()
 
-    return report
+    return report, raw_data
 
 
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:

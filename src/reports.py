@@ -83,11 +83,23 @@ class ReportBuilder(ABC):
 
     @staticmethod
     def _add_config_data(report: dict):
-        report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = [config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS]
-        report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = [config.TRUNCATED_RANKING_RETRIEVER_RESULTS]
-        report['CLASSIFICATION_LEVELS'] = [config.CLASSIFICATION_LEVELS]
-        report['RETRIEVAL_MODE'] = [config.RETRIEVAL_MODE]
-        report['USE_RERANKER'] = [config.USE_RERANKER]
+        report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
+        report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = config.TRUNCATED_RANKING_RETRIEVER_RESULTS
+        report['CLASSIFICATION_LEVELS'] = config.CLASSIFICATION_LEVELS
+        report['RETRIEVAL_MODE'] = config.RETRIEVAL_MODE
+        report['USE_RERANKER'] = config.USE_RERANKER
+
+    def get_raw_data(self) -> pd.DataFrame:
+        """Gets the raw data of this report.
+
+        Returns a DataFrame with multiple rows (one for each result) and multiple columns (one for each attribute).
+        """
+        raw_data = {
+            'target': self._targets,
+            'prediction': self._predictions
+        }
+        self._add_config_data(raw_data)
+        return pd.DataFrame(raw_data)
 
 
 class ReportBuilderFor2ClassificationLevels(ReportBuilder):
