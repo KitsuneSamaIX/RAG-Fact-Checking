@@ -243,7 +243,7 @@ class _Common:
 class _Local(_Common):
     GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
-    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'  # TODO use other chunk sizes 512, 1024, etc
+    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
     CACHED_URLS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/evidence_to_index'
     RESULTS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Results'
@@ -282,10 +282,10 @@ class _LocalDebug(_Local):
 
 
 class _UniudMitel3Server(_Common):
-    GROUND_TRUTH_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/ground_truth.csv'
+    GROUND_TRUTH_DATASET_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/ground_truth.csv'
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
     # ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/1024'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
     CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
     HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
     RESULTS_PATH = '/home/fedrigo/results/RAG-Fact-Checking/'
@@ -337,9 +337,9 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     # SHOW_PROMPT_FOR_DEBUG = True
     # USE_SAMPLE = True
     SAMPLE_SIZE = 100
-    # RETRIEVAL_MODE = 'vs'
+    RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
-    CLASSIFICATION_LEVELS = 6
+    CLASSIFICATION_LEVELS = 2
 
 
 # Set config class
