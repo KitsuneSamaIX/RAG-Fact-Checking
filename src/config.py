@@ -339,7 +339,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SAMPLE_SIZE = 100
     RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
-    CLASSIFICATION_LEVELS = 2
+    CLASSIFICATION_LEVELS = 6
 
 
 # Set config class
