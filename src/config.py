@@ -23,7 +23,7 @@ class _Common:
 
     # LLM
     LLM_TEMPERATURE = 0
-    LLM_MAX_TOKENS = 20
+    LLM_MAX_TOKENS = 50
 
     # Classification levels
     #   2 -> use True/False.
@@ -339,7 +339,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
     SAMPLE_SIZE = 100
     RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
-    CLASSIFICATION_LEVELS = 6
+    CLASSIFICATION_LEVELS = 2
 
 
 # Set config class
