@@ -251,7 +251,7 @@ class _Local(_Common):
     @classmethod
     def get_llm(cls) -> BaseLanguageModel:
         return ChatOllama(
-            model='llama3.1',
+            model='llama3.2',
             temperature=cls.LLM_TEMPERATURE,
             num_predict=cls.LLM_MAX_TOKENS
         )
@@ -276,9 +276,9 @@ class _LocalDebug(_Local):
     # SHOW_PROMPT_FOR_DEBUG = True
     USE_SAMPLE = True
     SAMPLE_SIZE = 4
-    # RETRIEVAL_MODE = 'vs'
+    RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
-    CLASSIFICATION_LEVELS = 6
+    CLASSIFICATION_LEVELS = 2
 
 
 class _UniudMitel3Server(_Common):
@@ -343,7 +343,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 # Set config class
-# config = _LocalDebug
-config = _UniudMitel3ServerDebug
+config = _LocalDebug
+# config = _UniudMitel3ServerDebug
 
 config.check()
