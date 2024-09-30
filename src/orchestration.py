@@ -20,16 +20,19 @@ def run_orchestrator():
     start_time = time.time()
     output_folder_path = _create_output_folder()
 
-    # for i in [1, 3]:
-    for i in range(1, 11):
+    for fill, invert in [(True, False), (False, True), (False, False)]:
         # Update config params
-        config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS = 10
-        config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
+        config.FILL_EVIDENCE = fill
+        config.FILL_EVIDENCE_UPPER_LIMIT = 10
+        config.INVERT_EVIDENCE = invert
+        for i in range(1, 11):
+            # Update config params
+            config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
 
-        # Run test suite
-        report, raw = run_test()
-        reports.append(report)
-        raw_data.append(raw)
+            # Run test suite
+            report, raw = run_test()
+            reports.append(report)
+            raw_data.append(raw)
 
     finish_time = (time.time() - start_time)
     print(f"\nTOTAL ELAPSED TIME (seconds): {finish_time:.2f} ({finish_time / 60:.2f} minutes)")

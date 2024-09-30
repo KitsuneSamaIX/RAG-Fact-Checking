@@ -83,11 +83,19 @@ class ReportBuilder(ABC):
 
     @staticmethod
     def _add_config_data(report: dict):
-        report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
+        match config.RETRIEVAL_MODE:
+            case 'se+vs':
+                report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
+            case 'vs':
+                report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = None
+            case _:
+                raise ValueError()
         report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = config.TRUNCATED_RANKING_RETRIEVER_RESULTS
         report['CLASSIFICATION_LEVELS'] = config.CLASSIFICATION_LEVELS
         report['RETRIEVAL_MODE'] = config.RETRIEVAL_MODE
         report['USE_RERANKER'] = config.USE_RERANKER
+        report['FILL_EVIDENCE'] = config.FILL_EVIDENCE
+        report['INVERT_EVIDENCE'] = config.INVERT_EVIDENCE
 
     def get_raw_data(self) -> pd.DataFrame:
         """Gets the raw data of this report.

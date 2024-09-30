@@ -22,7 +22,7 @@ class _Common:
     # #################################
 
     # LLM
-    LLM_TEMPERATURE = 0
+    LLM_TEMPERATURE = 0.1
     LLM_MAX_TOKENS = 50
 
     # Classification levels
@@ -31,14 +31,19 @@ class _Common:
     CLASSIFICATION_LEVELS = 2
 
     # Retrieval mode
-    #   'se+vs'   -> retrieve N results from a search engine (ex. Bing), build a vector store from those results and
-    #                 then retrieve N documents from the vector store.
+    #   'se+vs'     -> retrieve N results from a search engine (ex. Bing), build a vector store from those results and
+    #                   then retrieve N documents from the vector store.
     #   'vs'        -> use a single vector store with all the evidence.
     RETRIEVAL_MODE = 'se+vs'
 
     # Retrieval
     VECTOR_STORE_SEARCH_TYPE = 'similarity'
     USE_RERANKER = False
+
+    # Retrieved evidence (documents)
+    FILL_EVIDENCE = False  # Fill evidence with irrelevant documents until we have FILL_EVIDENCE_UPPER_LIMIT documents
+    FILL_EVIDENCE_UPPER_LIMIT = None
+    INVERT_EVIDENCE = False  # Invert the order of the retrieved documents
 
     # Text splitter
     TEXT_SPLITTER_CHUNK_SIZE = 1000  # Ignored when using pre-built vector stores
@@ -209,11 +214,17 @@ class _Common:
         if cls.RESULTS_PATH is None:
             raise RuntimeError("Configuration parameter 'RESULTS_PATH' must be set.")
 
+        if cls.FILL_EVIDENCE:
+            if cls.FILL_EVIDENCE_UPPER_LIMIT is None or not cls.FILL_EVIDENCE_UPPER_LIMIT > 0:
+                raise RuntimeError("Configuration parameter 'FILL_EVIDENCE_UPPER_LIMIT' must be set and >0.")
+
     @classmethod
     def get_printable_config(cls) -> str:
         """Returns a printable text of the key configuration parameters.
         """
         lines = []
+        lines.append("\nDATASET:")
+        lines.append(f" - GROUND_TRUTH_DATASET_PATH: {cls.GROUND_TRUTH_DATASET_PATH}")
         lines.append("\nCONFIGURATION:")
         lines.append(f" - LLM (model): {cls.get_llm()}")
         lines.append(f" - Embeddings (model): {cls.get_embeddings()}")
@@ -225,6 +236,10 @@ class _Common:
         lines.append(f" - USE_RERANKER: {cls.USE_RERANKER}")
         if cls.USE_RERANKER:
             lines.append(f" - Cross-Encoder (model): {cls.get_document_compressor()}")
+        lines.append(f" - FILL_EVIDENCE: {cls.FILL_EVIDENCE}")
+        if cls.FILL_EVIDENCE:
+            lines.append(f" - FILL_EVIDENCE_UPPER_LIMIT: {cls.FILL_EVIDENCE_UPPER_LIMIT}")
+        lines.append(f" - INVERT_EVIDENCE: {cls.INVERT_EVIDENCE}")
         if cls.RETRIEVAL_MODE == 'se+vs':
             lines.append(f" - TEXT_SPLITTER_CHUNK_SIZE: {cls.TEXT_SPLITTER_CHUNK_SIZE}")
             lines.append(f" - TEXT_SPLITTER_CHUNK_OVERLAP: {cls.TEXT_SPLITTER_CHUNK_OVERLAP}")
@@ -272,13 +287,16 @@ class _Local(_Common):
 class _LocalDebug(_Local):
     VERBOSE = True
     DEBUG = True
-    # SHOW_CONTEXT_FOR_DEBUG = True
+    SHOW_CONTEXT_FOR_DEBUG = True
     # SHOW_PROMPT_FOR_DEBUG = True
     USE_SAMPLE = True
-    SAMPLE_SIZE = 4
+    SAMPLE_SIZE = 1
     RETRIEVAL_MODE = 'vs'
     # USE_RERANKER = True
     CLASSIFICATION_LEVELS = 2
+    FILL_EVIDENCE = True
+    FILL_EVIDENCE_UPPER_LIMIT = 10
+    INVERT_EVIDENCE = True
 
 
 class _UniudMitel3Server(_Common):

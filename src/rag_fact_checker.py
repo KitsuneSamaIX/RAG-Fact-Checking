@@ -5,16 +5,16 @@ The RAGFactChecker class handles the RAG chain.
 
 from typing import Self
 
-import bs4
 import pandas as pd
 import re
+import random
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
-from retrieval import create_retriever_from_urls, create_retriever_from_vector_store
+from retrieval import create_vector_store_from_urls, create_retriever_from_vector_store
 from common import Fact
 from prompts import get_fact_checking_prompt_template, get_retry_msg
 from config import config
@@ -24,20 +24,27 @@ class RAGFactChecker:
     """RAG based fact-checker.
     """
 
-    def __init__(self, retriever: BaseRetriever):
+    def __init__(self, retriever: BaseRetriever, vector_store: VectorStore):
+        """Inits the RAGFactChecker.
+
+        - The 'retriever' is used for the RAG.
+        - The raw 'vector_store' is used for the (optional) evidence fill.
+        """
         self._retriever = retriever
+        self._vector_store = vector_store
 
     @classmethod
     def from_urls(cls, urls: pd.Series) -> Self:
         """Builds a new RAGFactChecker.
         """
-        return cls(create_retriever_from_urls(urls))
+        vector_store = create_vector_store_from_urls(urls)
+        return cls(create_retriever_from_vector_store(vector_store), vector_store)
 
     @classmethod
     def from_vector_store(cls, vector_store: VectorStore) -> Self:
         """Builds a new RAGFactChecker.
         """
-        return cls(create_retriever_from_vector_store(vector_store))
+        return cls(create_retriever_from_vector_store(vector_store), vector_store)
 
     def check(self, fact: Fact) -> bool | int | None:
         """Checks the truthfulness of the fact using RAG.
@@ -45,8 +52,8 @@ class RAGFactChecker:
         Note: returns None when the LLM response cannot be parsed.
         """
 
-        # Context retrieval  # TODO: add 'date' field to query (can it be useful?)
-        retrieval_chain = self._retriever | self._format_docs
+        # Context retrieval
+        retrieval_chain = self._retriever | self._fill_docs | self._invert_docs | self._format_docs
         context_retrieval_query = "\n".join([fact.speaker, fact.text])
         context = retrieval_chain.invoke(context_retrieval_query)
 
@@ -115,6 +122,25 @@ class RAGFactChecker:
     @staticmethod
     def _format_docs(docs: list[Document]) -> str:
         return "\n\n".join(doc.page_content for doc in docs)
+
+    @staticmethod
+    def _invert_docs(docs: list[Document]) -> list[Document]:
+        if config.INVERT_EVIDENCE:
+            docs.reverse()
+        return docs
+
+    def _fill_docs(self, docs: list[Document]) -> list[Document]:
+        """Fills evidence with irrelevant documents until we have FILL_EVIDENCE_UPPER_LIMIT documents.
+        """
+        if config.FILL_EVIDENCE:
+            n_docs_to_add = config.FILL_EVIDENCE_UPPER_LIMIT - len(docs)
+            if n_docs_to_add > 0:
+                embedding = config.get_embeddings().embed_query("")  # Embed an empty query to get the vector's format
+                for i in range(0, len(embedding)):
+                    embedding[i] = random.uniform(-0.2, 0.2)  # Randomize the vector
+                docs_to_add = self._vector_store.similarity_search_by_vector(embedding, k=n_docs_to_add)
+                docs = docs + docs_to_add
+        return docs
 
     @staticmethod
     def _response_parser(response: str) -> bool | int | None:

@@ -16,7 +16,7 @@ from config import config
 
 
 def create_retriever_from_urls(urls: pd.Series) -> BaseRetriever:
-    return create_retriever_from_vector_store(_create_vector_store_from_urls(urls))
+    return create_retriever_from_vector_store(create_vector_store_from_urls(urls))
 
 
 def create_retriever_from_vector_store(vector_store: VectorStore) -> BaseRetriever:
@@ -39,7 +39,7 @@ def create_retriever_from_vector_store(vector_store: VectorStore) -> BaseRetriev
     return vs_retriever
 
 
-def _create_vector_store_from_urls(urls: pd.Series) -> VectorStore:
+def create_vector_store_from_urls(urls: pd.Series) -> VectorStore:
     result_docs = []
 
     for url in urls:
