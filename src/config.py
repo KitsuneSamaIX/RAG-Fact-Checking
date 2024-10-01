@@ -1,6 +1,11 @@
 """Centralized configuration.
 
-Note: keep sensitive data (like API keys) in environment variables.
+Note:
+- keep sensitive data (like API keys) in environment variables.
+
+IMPORTANT:
+ - Do NOT cache any of these configuration parameters (ex. in global variables),
+    the orchestrator must be able to change any parameter before each run of the test suite.
 """
 
 from langchain_core.language_models import BaseLanguageModel, BaseLLM, BaseChatModel
@@ -171,6 +176,7 @@ class _Common:
     # Vector store
     VECTOR_STORE_BACKEND = 'FAISS'  # Note: currently this parameter has NO effect, it is here only for documentation purposes
     ALL_EVIDENCE_VECTOR_STORE_PATH = None  # Location of the vector store containing all evidence
+    ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME = None
 
     # Other data locations
     HUGGING_FACE_CACHE_PATH = None
@@ -203,13 +209,17 @@ class _Common:
             if cls.SAMPLE_SIZE is None or not cls.SAMPLE_SIZE > 0:
                 raise RuntimeError("Configuration parameter 'SAMPLE_SIZE' must be set and >0.")
 
-        if cls.RETRIEVAL_MODE == 'vs':
-            if cls.ALL_EVIDENCE_VECTOR_STORE_PATH is None:
-                raise RuntimeError("Configuration parameter 'ALL_EVIDENCE_VECTOR_STORE_PATH' must be set.")
+        if cls.RETRIEVAL_MODE == 'se+vs' and cls.SEARCH_ENGINE_RESULTS_DATASET_PATH is None:
+            raise RuntimeError("Configuration parameter 'SEARCH_ENGINE_RESULTS_DATASET_PATH' must be set.")
 
-        if cls.USE_CACHED_URLS:
-            if cls.CACHED_URLS_PATH is None:
-                raise RuntimeError("Configuration parameter 'CACHED_URLS_PATH' must be set.")
+        if cls.RETRIEVAL_MODE == 'vs' and cls.ALL_EVIDENCE_VECTOR_STORE_PATH is None:
+            raise RuntimeError("Configuration parameter 'ALL_EVIDENCE_VECTOR_STORE_PATH' must be set.")
+
+        if cls.RETRIEVAL_MODE == 'vs' and cls.ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME is None:
+            raise RuntimeError("Configuration parameter 'ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME' must be set.")
+
+        if cls.RETRIEVAL_MODE == 'se+vs' and cls.USE_CACHED_URLS and cls.CACHED_URLS_PATH is None:
+            raise RuntimeError("Configuration parameter 'CACHED_URLS_PATH' must be set.")
 
         if cls.RESULTS_PATH is None:
             raise RuntimeError("Configuration parameter 'RESULTS_PATH' must be set.")
@@ -260,6 +270,7 @@ class _Local(_Common):
     SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
     # ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'
     ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
+    ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME = 'index'
     CACHED_URLS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/evidence_to_index'
     RESULTS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Results'
 
@@ -301,10 +312,11 @@ class _LocalDebug(_Local):
 
 class _UniudMitel3Server(_Common):
     GROUND_TRUTH_DATASET_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/ground_truth.csv'
-    SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
-    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/1024'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
-    CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
+    # SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
+    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/512'
+    ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME = 'FAISS_INDEX_CHUNK_SIZE_512'
+    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
+    # CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
     HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
     RESULTS_PATH = '/home/fedrigo/results/RAG-Fact-Checking/'
 
@@ -329,13 +341,12 @@ class _UniudMitel3Server(_Common):
     @classmethod
     def get_embeddings(cls) -> Embeddings:
         if cls.RETRIEVAL_MODE == 'vs':
-            # return HuggingFaceEmbeddings(
-            #     model_name='sentence-transformers/all-mpnet-base-v2',
-            #     model_kwargs={'device': 0},
-            #     encode_kwargs={'normalize_embeddings': True},
-            #     cache_folder=cls.HUGGING_FACE_CACHE_PATH
-            # )
-            return OllamaEmbeddings(model='nomic-embed-text')
+            return HuggingFaceEmbeddings(
+                model_name='sentence-transformers/all-mpnet-base-v2',
+                model_kwargs={'device': 0},
+                encode_kwargs={'normalize_embeddings': True},
+                cache_folder=cls.HUGGING_FACE_CACHE_PATH
+            )
         else:
             return OllamaEmbeddings(model='nomic-embed-text')
 
@@ -361,7 +372,7 @@ class _UniudMitel3ServerDebug(_UniudMitel3Server):
 
 
 # Set config class
-config = _LocalDebug
-# config = _UniudMitel3ServerDebug
+# config = _LocalDebug
+config = _UniudMitel3ServerDebug
 
 config.check()
