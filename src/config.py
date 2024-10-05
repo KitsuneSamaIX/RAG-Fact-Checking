@@ -357,7 +357,7 @@ class _UniudMitel3Server(_Common):
         if cls.RETRIEVAL_MODE == 'vs':
             return HuggingFaceEmbeddings(
                 model_name='sentence-transformers/all-mpnet-base-v2',
-                model_kwargs={'device': 0},
+                model_kwargs={'device': 'cpu'},
                 encode_kwargs={'normalize_embeddings': True},
                 cache_folder=cls.HUGGING_FACE_CACHE_PATH
             )
