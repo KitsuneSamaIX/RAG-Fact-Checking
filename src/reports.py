@@ -83,13 +83,10 @@ class ReportBuilder(ABC):
 
     @staticmethod
     def _add_config_data(report: dict):
-        match config.RETRIEVAL_MODE:
-            case 'se+vs':
-                report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
-            case 'vs':
-                report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = None
-            case _:
-                raise ValueError()
+        if config.RETRIEVAL_MODE == 'se+vs':
+            report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
+        else:
+            report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = None
         report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = config.TRUNCATED_RANKING_RETRIEVER_RESULTS
         report['CLASSIFICATION_LEVELS'] = config.CLASSIFICATION_LEVELS
         report['RETRIEVAL_MODE'] = config.RETRIEVAL_MODE

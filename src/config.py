@@ -201,6 +201,13 @@ class _Common:
     def check(cls):
         """Checks for common oversights in configuration parameters.
         """
+        supported_classification_levels = [2, 6]
+        if cls.CLASSIFICATION_LEVELS not in supported_classification_levels:
+            raise RuntimeError(f"Configuration parameter 'CLASSIFICATION_LEVELS' must be in {supported_classification_levels}.")
+
+        supported_retrieval_modes = ['se+vs', 'vs']
+        if cls.RETRIEVAL_MODE not in supported_retrieval_modes:
+            raise RuntimeError(f"Configuration parameter 'RETRIEVAL_MODE' must be in {supported_retrieval_modes}.")
 
         if cls.GROUND_TRUTH_DATASET_PATH is None:
             raise RuntimeError("Configuration parameter 'GROUND_TRUTH_DATASET_PATH' must be set.")
