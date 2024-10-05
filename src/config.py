@@ -8,6 +8,8 @@ IMPORTANT:
     the orchestrator must be able to change any parameter before each run of the test suite.
 """
 
+import os
+
 from langchain_core.language_models import BaseLanguageModel, BaseLLM, BaseChatModel
 from langchain_core.embeddings import Embeddings
 from langchain_core.documents import BaseDocumentCompressor
@@ -273,13 +275,16 @@ class _Common:
 
 
 class _Local(_Common):
-    GROUND_TRUTH_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/ground_truth.csv'
-    SEARCH_ENGINE_RESULTS_DATASET_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/df_evidence_list-top10.csv'
-    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/embeddings/1024'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
+    DATASET_PATH_PREFIX = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/'
+    DATASET_NAME = 'cikm2024_soprano_clean'
+    DATASET_NAME_2 = 'cikm2024_soprano'
+
+    GROUND_TRUTH_DATASET_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME, 'ground_truth.csv')
+    SEARCH_ENGINE_RESULTS_DATASET_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME_2, 'df_evidence_list-top10.csv')
+    ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME, 'embeddings/faiss_nomic_embed_text_chunk_size_1000/')
     ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME = 'index'
-    CACHED_URLS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Data/cikm2024_soprano/evidence_to_index'
-    RESULTS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Results'
+    CACHED_URLS_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME_2, 'evidence_to_index/')
+    RESULTS_PATH = '/Users/mattia/Desktop/Lab avanzato 1 - RAG/Results/'
 
     @classmethod
     def get_llm(cls) -> BaseLanguageModel:
@@ -318,12 +323,14 @@ class _LocalDebug(_Local):
 
 
 class _UniudMitel3Server(_Common):
-    GROUND_TRUTH_DATASET_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/ground_truth.csv'
-    # SEARCH_ENGINE_RESULTS_DATASET_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/df_evidence_list-top10.csv'
-    ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/embeddings/512'
+    DATASET_PATH_PREFIX = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/'
+    DATASET_NAME = 'cikm2024_soprano'
+
+    GROUND_TRUTH_DATASET_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME, 'ground_truth.csv')
+    # SEARCH_ENGINE_RESULTS_DATASET_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME, 'df_evidence_list-top10.csv')
+    ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME, 'embeddings/512/')
     ALL_EVIDENCE_VECTOR_STORE_INDEX_NAME = 'FAISS_INDEX_CHUNK_SIZE_512'
-    # ALL_EVIDENCE_VECTOR_STORE_PATH = '/mnt/dmif-nas/SMDC/users/fedrigo/RAG-Fact-Checking/data/cikm2024_soprano_clean/embeddings/faiss_nomic_embed_text_chunk_size_1000/'
-    # CACHED_URLS_PATH = '/mnt/dmif-nas/SMDC/datasets/Misinfo-Truncated-Rankings-RAG/data/cikm2024_soprano/evidence_to_index'
+    # CACHED_URLS_PATH = os.path.join(DATASET_PATH_PREFIX, DATASET_NAME, 'evidence_to_index/')
     HUGGING_FACE_CACHE_PATH = '/mnt/dmif-nas/SMDC/HF-Cache'
     RESULTS_PATH = '/home/fedrigo/results/RAG-Fact-Checking/'
 
