@@ -32,10 +32,10 @@ def _get_fact_checking_prompt_template_for_6_classification_levels() -> ChatProm
 
 
 _system_msg_1 = """\
-You are an helpful assistant for fact checking.
-You have to check if the <fact> said by the <speaker> is true based on the provided <context>.
+You are a fact-checking expert trained to evaluate the truthfulness of statements based on provided evidence.
+Your task is to assess whether the <fact>, stated by the <speaker>, is true based on the <context> provided.
 
-Your response MUST be either:
+You must respond with a single word:
 - "TRUE" if the fact is true;
 - "FALSE" if the fact is false.
 """
