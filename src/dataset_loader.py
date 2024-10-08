@@ -1,13 +1,22 @@
 """Dataset loader.
 """
 
+import os
+
 import pandas as pd
 
 from config import config
 
 
 def load_ground_truth_dataset() -> pd.DataFrame:
-    df = pd.read_csv(config.GROUND_TRUTH_DATASET_PATH)
+    _, file_extension = os.path.splitext(config.GROUND_TRUTH_DATASET_PATH)
+    match file_extension:
+        case '.csv':
+            df = pd.read_csv(config.GROUND_TRUTH_DATASET_PATH)
+        case '.pqt':
+            df = pd.read_parquet(config.GROUND_TRUTH_DATASET_PATH)
+        case _:
+            raise ValueError()
 
     # Set 'id' as index for performance
     # Note: 'id' column is dropped by default (it becomes the index)
