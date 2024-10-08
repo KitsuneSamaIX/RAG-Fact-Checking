@@ -81,6 +81,10 @@ class ReportBuilder(ABC):
     def are_all_errors(self) -> bool:
         return self._n_total == self._n_error
 
+    def _add_info_data(self, report: dict):
+        report['n_error'] = self.n_error
+        report['n_undefined_prediction'] = self.n_undefined_prediction
+
     @staticmethod
     def _add_config_data(report: dict):
         if config.RETRIEVAL_MODE == 'se+vs':
@@ -110,7 +114,7 @@ class ReportBuilder(ABC):
 class ReportBuilderFor2ClassificationLevels(ReportBuilder):
 
     def build(self) -> pd.DataFrame:
-        print("\nMETRICS (excluding aborted checks):")
+        print("\nMETRICS (excluding errors and undefined predictions):")
         # Compute metrics
         accuracy = accuracy_score(self._targets, self._predictions)
         precision = precision_score(self._targets, self._predictions, pos_label=True, average='binary', zero_division=np.nan)
@@ -134,9 +138,9 @@ class ReportBuilderFor2ClassificationLevels(ReportBuilder):
             'accuracy': [accuracy],
             'precision': [precision],
             'recall': [recall],
-            'f1': [f1],
-            'n_error': [self._n_error]  # Add number of errors to the report
+            'f1': [f1]
         }
+        self._add_info_data(report_data)
         self._add_config_data(report_data)
         return pd.DataFrame(report_data)
 
@@ -144,7 +148,7 @@ class ReportBuilderFor2ClassificationLevels(ReportBuilder):
 class ReportBuilderFor6ClassificationLevels(ReportBuilder):
 
     def build(self) -> pd.DataFrame:
-        print("\nMETRICS (excluding aborted checks):")
+        print("\nMETRICS (excluding errors and undefined predictions):")
         # Compute metrics
         accuracy = accuracy_score(self._targets, self._predictions)
         mse = mean_squared_error(self._targets, self._predictions)
@@ -164,9 +168,9 @@ class ReportBuilderFor6ClassificationLevels(ReportBuilder):
         report_data = {
             'accuracy': [accuracy],
             'mse': [mse],
-            'mae': [mae],
-            'n_error': [self._n_error]  # Add number of errors to the report
+            'mae': [mae]
         }
+        self._add_info_data(report_data)
         self._add_config_data(report_data)
         return pd.DataFrame(report_data)
 
