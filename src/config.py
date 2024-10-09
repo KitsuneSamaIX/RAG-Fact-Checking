@@ -347,8 +347,8 @@ class _UniudMitel3Server(_Common):
     @classmethod
     def get_llm(cls) -> BaseLanguageModel:
         return ChatOllama(
-            # model='llama3.1:8b-instruct-fp16',
-            model='mistral-nemo:12b-instruct-2407-fp16',
+            model='llama3.1:8b-instruct-fp16',
+            # model='mistral-nemo:12b-instruct-2407-fp16',
             temperature=cls.LLM_TEMPERATURE,
             num_predict=cls.LLM_MAX_TOKENS
         )
