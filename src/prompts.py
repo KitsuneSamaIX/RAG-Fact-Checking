@@ -27,7 +27,7 @@ def _get_fact_checking_prompt_template_for_2_classification_levels() -> ChatProm
 def _get_fact_checking_prompt_template_for_6_classification_levels() -> ChatPromptTemplate:
     return ChatPromptTemplate.from_messages([
         ("system", _system_msg_2),
-        ("human", _human_msg_1)
+        ("human", _human_msg_2)
     ])
 
 
@@ -61,6 +61,15 @@ You must respond with a single value (0, 1, 2, 3, 4, 5) that best represents the
 
 _human_msg_1 = """\
 Check the truthfulness of the following statement:
+{speaker} said {fact}
+
+Context: 
+{context}
+"""
+
+
+_human_msg_2 = """\
+Rate the truthfulness of the following statement:
 {speaker} said {fact}
 
 Context: 
