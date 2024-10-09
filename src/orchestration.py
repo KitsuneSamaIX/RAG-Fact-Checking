@@ -31,6 +31,8 @@ def run_orchestrator():
     #     for dataset_name in ['cikm2024_debona', 'cikm2024_soprano', 'climate_fever', 'feverous']:
     #         # Update config params
     #         config.DATASET_NAME = dataset_name
+    #         config.GROUND_TRUTH_DATASET_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'ground_truth.pqt')
+    #         config.ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'embeddings/512/')
     #         for levels in [2, 6]:
     #             # Update config params
     #             config.CLASSIFICATION_LEVELS = levels
@@ -57,6 +59,8 @@ def run_orchestrator():
         for dataset_name in ['cikm2024_debona', 'cikm2024_soprano', 'climate_fever', 'feverous']:
             # Update config params
             config.DATASET_NAME = dataset_name
+            config.GROUND_TRUTH_DATASET_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'ground_truth.pqt')
+            config.ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'embeddings/512/')
             for levels in [2]:
                 # Update config params
                 config.CLASSIFICATION_LEVELS = levels
