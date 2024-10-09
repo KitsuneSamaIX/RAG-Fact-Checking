@@ -33,44 +33,38 @@ def _get_fact_checking_prompt_template_for_6_classification_levels() -> ChatProm
 
 _system_msg_1 = """\
 You are a fact-checking expert trained to evaluate the truthfulness of statements based on provided evidence.
-Your task is to assess whether the <fact>, stated by the <speaker>, is true based on the <context> provided.
+Your task is to assess whether a statement, stated by a speaker, is true based on the context provided.
+The context provided is composed of pieces of documents that might be relevant to verify whether or not the statement is true.
 
 You must respond with a single word:
-- "TRUE" if the fact is true;
-- "FALSE" if the fact is false.
+- "TRUE" if the statement is true
+- "FALSE" if the statement is false
 """
 
 
 _system_msg_2 = """\
 You are a fact-checking expert trained to evaluate the truthfulness of statements based on provided evidence.
-Your task is to assess whether the <fact>, stated by the <speaker>, is accurate based on the <context> provided.
+Your task is to assess whether a statement, stated by a speaker, is accurate based on the context provided.
+The context provided is composed of pieces of documents that might be relevant to verify whether or not the statement is true.
 
-The fact-checking will be done using the "TRUTH-O-METER" system from "politifact.com", which rates the truthfulness of statements on a scale of 0 to 5, as follows:
-- 5 = True
-- 4 = Mostly True
-- 3 = Half True
-- 2 = Mostly False
-- 1 = False
-- 0 = Pants on Fire
+You have to rate the statement using the following scale which rates the truthfulness of statements with a value from 0 to 5 as follows:
+- 5 = True (the statement is accurate and there’s nothing significant missing)
+- 4 = Mostly True (the statement is accurate but needs clarification or additional information)
+- 3 = Half True (the statement is partially accurate but leaves out important details or takes things out of context)
+- 2 = Mostly False (the statement contains an element of truth but ignores critical facts that would give a different impression)
+- 1 = False (the statement is not accurate)
+- 0 = Pants on Fire (the statement is not accurate and makes a ridiculous claim)
 
-You must respond with a single number (0, 1, 2, 3, 4, 5) that best represents the accuracy of the fact according to the TRUTH-O-METER scale.
+You must respond with a single value (0, 1, 2, 3, 4, 5) that best represents the accuracy of the statement according to the scale.
 """
 
 
 _human_msg_1 = """\
-Check the following:
+Check the truthfulness of the following statement:
+{speaker} said {fact}
 
-<speaker>
-{speaker}
-</speaker>
-
-<fact>
-{fact}
-</fact>
-
-<context>
+Context: 
 {context}
-</context>
 """
 
 
@@ -85,12 +79,12 @@ def get_retry_msg() -> str:
 
 
 _retry_msg_for_2_classification_levels = """\
-You must respond in a single word and the response MUST be either:
-- "TRUE" if the fact is true;
-- "FALSE" if the fact is false.
+You must respond with a single word and the response must be either:
+- "TRUE" if the statement is true
+- "FALSE" if the statement is false
 """
 
 
 _retry_msg_for_6_classification_levels = """\
-You must respond with a single number (0, 1, 2, 3, 4, 5) that best represents the accuracy of the fact according to the TRUTH-O-METER scale.
+You must respond with a single value (0, 1, 2, 3, 4, 5) that best represents the accuracy of the statement according to the scale.
 """
