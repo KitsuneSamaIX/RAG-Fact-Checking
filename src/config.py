@@ -377,8 +377,8 @@ class _UniudMitel3Server(_Common):
 
 
 class _UniudMitel3ServerDebug(_UniudMitel3Server):
-    # VERBOSE = True
-    # DEBUG = True
+    VERBOSE = True
+    DEBUG = True
     # SHOW_CONTEXT_FOR_DEBUG = True
     # SHOW_PROMPT_FOR_DEBUG = True
     # USE_SAMPLE = True
