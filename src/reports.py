@@ -82,6 +82,8 @@ class ReportBuilder(ABC):
         return self._n_total == self._n_error
 
     def _add_info_data(self, report: dict):
+        report['n_total'] = self.n_total
+        report['n_correct'] = self.n_correct
         report['n_error'] = self.n_error
         report['n_undefined_prediction'] = self.n_undefined_prediction
 
