@@ -21,7 +21,7 @@ def load_ground_truth_dataset() -> pd.DataFrame:
     # Set 'id' as index for performance
     # Note: 'id' column is dropped by default (it becomes the index)
     df.set_index('statement_id', drop=True, inplace=True)
-    df.drop(columns=['Unnamed: 0'], inplace=True)
+    # df.drop(columns=['Unnamed: 0'], inplace=True)
 
     # Rename columns to standard names
     df.rename(columns={'statement_text': 'text', 'statement_date': 'date'}, inplace=True)
