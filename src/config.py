@@ -30,7 +30,7 @@ class _Common:
 
     # LLM
     LLM_TEMPERATURE = 0.1
-    LLM_MAX_TOKENS = 50
+    LLM_MAX_TOKENS = 100
 
     # Classification levels
     #   2 -> use True/False.
