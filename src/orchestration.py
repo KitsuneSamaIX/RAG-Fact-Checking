@@ -25,22 +25,28 @@ def run_orchestrator():
     #
     # Note:
     #  - make sure the varying configuration parameters are included in the report
-    for levels in [2, 6]:
+    for llm_name in ['mistral-nemo:12b-instruct-2407-fp16', 'llama3.1:8b-instruct-fp16']:
         # Update config params
-        config.CLASSIFICATION_LEVELS = levels
-        for fill, invert in [(True, False), (False, True), (False, False)]:
+        config.LLM_NAME = llm_name
+        for dataset_name in ['cikm2024_debona', 'cikm2024_soprano', 'climate_fever', 'feverous']:
             # Update config params
-            config.FILL_EVIDENCE = fill
-            config.FILL_EVIDENCE_UPPER_LIMIT = 10
-            config.INVERT_EVIDENCE = invert
-            for i in range(1, 11):
+            config.DATASET_NAME = dataset_name
+            for levels in [2, 6]:
                 # Update config params
-                config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
+                config.CLASSIFICATION_LEVELS = levels
+                for fill, invert in [(True, False), (False, True), (False, False)]:
+                    # Update config params
+                    config.FILL_EVIDENCE = fill
+                    config.FILL_EVIDENCE_UPPER_LIMIT = 10
+                    config.INVERT_EVIDENCE = invert
+                    for i in range(1, 11):
+                        # Update config params
+                        config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
 
-                # Run test suite
-                report, raw = run_test()
-                reports.append(report)
-                raw_data.append(raw)
+                        # Run test suite
+                        report, raw = run_test()
+                        reports.append(report)
+                        raw_data.append(raw)
     # ##################################################################################################################
 
     finish_time = (time.time() - start_time)

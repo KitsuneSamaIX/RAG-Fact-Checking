@@ -89,10 +89,12 @@ class ReportBuilder(ABC):
 
     @staticmethod
     def _add_config_data(report: dict):
+        if hasattr(config, 'LLM_NAME'):
+            report['LLM_NAME'] = config.LLM_NAME
+        if hasattr(config, 'DATASET_NAME'):
+            report['DATASET_NAME'] = config.DATASET_NAME
         if config.RETRIEVAL_MODE == 'se+vs':
             report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = config.TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS
-        else:
-            report['TRUNCATED_RANKING_SEARCH_ENGINE_RESULTS'] = None
         report['TRUNCATED_RANKING_RETRIEVER_RESULTS'] = config.TRUNCATED_RANKING_RETRIEVER_RESULTS
         report['CLASSIFICATION_LEVELS'] = config.CLASSIFICATION_LEVELS
         report['RETRIEVAL_MODE'] = config.RETRIEVAL_MODE
