@@ -37,6 +37,8 @@ def run_orchestrator():
     #             config.GROUND_TRUTH_DATASET_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'ground_truth.pqt')
     #         config.ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'embeddings/512/')
     #         for levels in [2, 6]:
+    #             if (levels == 6) and (dataset_name in ['climate_fever', 'feverous']):
+    #                 continue  # These datasets do not support the 6 classification levels
     #             # Update config params
     #             config.CLASSIFICATION_LEVELS = levels
     #             for fill, invert in [(True, False), (False, True), (False, False)]:
@@ -53,7 +55,7 @@ def run_orchestrator():
     #                     reports.append(report)
     #                     raw_data.append(raw)
 
-
+    # Run mini test to see if everything works
     config.USE_SAMPLE = True
     config.SAMPLE_SIZE = 3
     for llm_name in ['mistral-nemo:12b-instruct-2407-fp16', 'llama3.1:8b-instruct-fp16']:
@@ -67,7 +69,9 @@ def run_orchestrator():
             else:
                 config.GROUND_TRUTH_DATASET_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'ground_truth.pqt')
             config.ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'embeddings/512/')
-            for levels in [2]:
+            for levels in [2, 6]:
+                if (levels == 6) and (dataset_name in ['climate_fever', 'feverous']):
+                    continue  # These datasets do not support the 6 classification levels
                 # Update config params
                 config.CLASSIFICATION_LEVELS = levels
                 for fill, invert in [(True, False)]:
@@ -83,7 +87,6 @@ def run_orchestrator():
                         report, raw = run_test()
                         reports.append(report)
                         raw_data.append(raw)
-
     # ##################################################################################################################
 
     finish_time = (time.time() - start_time)
