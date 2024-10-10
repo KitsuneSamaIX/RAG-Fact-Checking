@@ -33,7 +33,7 @@ def _get_fact_checking_prompt_template_for_6_classification_levels() -> ChatProm
 
 _system_msg_1 = """\
 You are a fact-checking expert trained to evaluate the truthfulness of statements based on provided evidence.
-Your task is to assess whether a statement, stated by a speaker, is true based on the context provided.
+Your task is to assess whether a statement is true based on the context provided.
 The context provided is composed of pieces of documents that might be relevant to verify whether or not the statement is true.
 
 You must respond with a single word:
@@ -44,7 +44,7 @@ You must respond with a single word:
 
 _system_msg_2 = """\
 You are a fact-checking expert trained to evaluate the truthfulness of statements based on provided evidence.
-Your task is to assess whether a statement, stated by a speaker, is accurate based on the context provided.
+Your task is to assess whether a statement is accurate based on the context provided.
 The context provided is composed of pieces of documents that might be relevant to verify whether or not the statement is true.
 
 You have to rate the statement using the following scale which rates the truthfulness of statements with a value from 0 to 5 as follows:
@@ -61,7 +61,7 @@ You must respond with a single value (0, 1, 2, 3, 4, 5) that best represents the
 
 _human_msg_1 = """\
 Check the truthfulness of the following statement:
-{speaker} said {fact}
+{statement}
 
 Context: 
 {context}
@@ -70,7 +70,7 @@ Context:
 
 _human_msg_2 = """\
 Rate the truthfulness of the following statement:
-{speaker} said {fact}
+{statement}
 
 Context: 
 {context}

@@ -46,29 +46,33 @@ class RAGFactChecker:
         """
         return cls(create_retriever_from_vector_store(vector_store), vector_store)
 
-    def check(self, fact: Fact) -> bool | int | None:
+    def check(self, fact: Fact) -> int | None:
         """Checks the truthfulness of the fact using RAG.
 
         Note: returns None when the LLM response cannot be parsed.
         """
+        # Statement to check
+        if pd.isna(fact.speaker):
+            statement = fact.text
+        else:
+            statement = fact.speaker + " said " + fact.text
 
         # Context retrieval
         retrieval_chain = self._retriever | self._fill_docs | self._invert_docs | self._format_docs
-        context_retrieval_query = "\n".join([fact.speaker, fact.text])
+        context_retrieval_query = statement
         context = retrieval_chain.invoke(context_retrieval_query)
 
         # Input data
         input_data = {
-            "speaker": fact.speaker,
-            "fact": fact.text,
-            "context": context
+            'statement': statement,
+            'context': context
         }
 
         # Main chain
         rag_chain = (
-                get_fact_checking_prompt_template()
-                | config.get_llm()
-                | StrOutputParser()
+            get_fact_checking_prompt_template()
+            | config.get_llm()
+            | StrOutputParser()
         )
 
         if config.DEBUG:
@@ -89,13 +93,13 @@ class RAGFactChecker:
         # Set good responses
         match config.CLASSIFICATION_LEVELS:
             case 2:
-                good_responses = ["TRUE", "FALSE"]
+                good_responses = ['TRUE', 'FALSE', 'True', 'False', 'true', 'false']
             case 6:
                 good_responses = range(0, 6)
             case _:
                 raise ValueError()
 
-        # Validate the response
+        # Validate the response and retry one time if necessary
         if response not in good_responses:
             if config.DEBUG:
                 print(f"\nRECEIVED BAD RESPONSE:\n{response}\n")
@@ -107,15 +111,15 @@ class RAGFactChecker:
             retry_prompt.append(("human", get_retry_msg()))
 
             rag_chain = (
-                    retry_prompt
-                    | config.get_llm()
-                    | StrOutputParser()
+                retry_prompt
+                | config.get_llm()
+                | StrOutputParser()
             )
 
             response = rag_chain.invoke(input_data)
 
         if config.VERBOSE:
-            print(f"\nThe response is:\n{response}\n")
+            print(f"\nThe response is: {response}\n")
 
         return self._response_parser(response)
 
@@ -143,7 +147,7 @@ class RAGFactChecker:
         return docs
 
     @staticmethod
-    def _response_parser(response: str) -> bool | int | None:
+    def _response_parser(response: str) -> int | None:
         match config.CLASSIFICATION_LEVELS:
             case 2:
                 return RAGFactChecker._response_parser_for_2_classification_levels(response)
@@ -153,11 +157,11 @@ class RAGFactChecker:
                 raise ValueError()
 
     @staticmethod
-    def _response_parser_for_2_classification_levels(response: str) -> bool | None:
+    def _response_parser_for_2_classification_levels(response: str) -> int | None:
         if re.match(r'.*TRUE.*', response, re.IGNORECASE):
-            return True
+            return 1
         elif re.match(r'.*FALSE.*', response, re.IGNORECASE):
-            return False
+            return 0
         else:
             return None
 

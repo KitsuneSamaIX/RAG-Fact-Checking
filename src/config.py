@@ -158,7 +158,7 @@ class _Common:
     # There are 3 types of datasets:
     #
     #   - GROUND_TRUTH_DATASET (required)
-    #       - columns: id, speaker, text, date, target
+    #       - columns: id, speaker, text, date, target, binary_target
     #
     #   - SEARCH_ENGINE_RESULTS_DATASET (optional)
     #       - columns: id, rank, snippet, url, uuid

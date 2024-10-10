@@ -32,12 +32,6 @@ def load_ground_truth_dataset() -> pd.DataFrame:
     if 'date' not in df.columns:
         df['date'] = None
 
-    # WORKAROUND for datasets that have a binary 'target' {0, 1} instead of the standard 'target' with 6 levels {0, 1, 2, 3, 4, 5}.
-    # We run these datasets only with 2 classification levels and so it is sufficient to map {0, 1} in {0, 1, 2, 3, 4, 5},
-    #  and the mapping is: 0 -> 0 and 1 -> 5.
-    if config.DATASET_NAME in ['climate_fever', 'feverous']:
-        df['target'] = df.apply(lambda row: 0 if row['target'] == 0 else 5, axis=1)
-
     if config.USE_SAMPLE:
         df = df.sample(config.SAMPLE_SIZE)
 

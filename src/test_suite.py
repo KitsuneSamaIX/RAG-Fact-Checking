@@ -54,8 +54,9 @@ def run_test_suite() -> tuple[pd.DataFrame, pd.DataFrame] | None:
             id_data = _get_fact_and_target(id, ground_truth_df)
 
             if config.VERBOSE:
-                print(f"\nSpeaker: {id_data[0].speaker}")
-                print(f"Fact: {id_data[0].text}\n")
+                print("\nFact:")
+                print(f" - speaker: {id_data[0].speaker}")
+                print(f" - text: {id_data[0].text}\n")
 
             # If RETRIEVAL_MODE == 'se+vs' then we need a new RAGFactChecker each time
             if config.RETRIEVAL_MODE == 'se+vs':
@@ -66,13 +67,7 @@ def run_test_suite() -> tuple[pd.DataFrame, pd.DataFrame] | None:
 
             pred = fact_checker.check(id_data[0])
 
-            match config.CLASSIFICATION_LEVELS:
-                case 2:
-                    target = _target_to_bool(id_data[1])
-                case 6:
-                    target = id_data[1]
-                case _:
-                    raise ValueError()
+            target = id_data[1]
 
             if config.VERBOSE:
                 print(f"\nThe target is: {target}\n")
@@ -90,9 +85,10 @@ def run_test_suite() -> tuple[pd.DataFrame, pd.DataFrame] | None:
     # Report
     print("\n\n\n\nREPORT:")
     if rb.are_all_errors():
-        print("All ID checks have been aborted due to errors! Check code or network configuration.")
-        report = None
-        raw_data = None
+        # print("All ID checks have been aborted due to errors! Check code or network configuration.")
+        # report = None
+        # raw_data = None
+        raise RuntimeError("All ID checks have been aborted due to errors! Check code or network configuration.")
     else:
         print(f"Checked IDs: {rb.n_total}")
         print(f"Correct answers: {rb.n_correct} ({(rb.n_correct / rb.n_total) * 100:.2f}%)")
@@ -110,14 +106,17 @@ def run_test_suite() -> tuple[pd.DataFrame, pd.DataFrame] | None:
 def _get_fact_and_target(id: str, df: pd.DataFrame) -> tuple[Fact, int]:
     """Gets the fact and the target value of the passed id.
     """
-    single_row = df.loc[df.index == id, ['speaker', 'text', 'date', 'target']].iloc[0]
+    single_row = df.loc[df.index == id, ['speaker', 'text', 'date', 'target', 'binary_target']].iloc[0]
 
     fact = Fact(
         speaker=single_row['speaker'],
         text=single_row['text'],
         date=single_row['date']
     )
-    target = single_row['target']
+    if config.CLASSIFICATION_LEVELS == 2:
+        target = single_row['binary_target']
+    else:
+        target = single_row['target']
 
     return fact, target
 

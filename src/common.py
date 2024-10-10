@@ -6,6 +6,6 @@ from dataclasses import dataclass
 
 @dataclass
 class Fact:
-    speaker: str
+    speaker: str | None
     text: str
-    date: str
+    date: str | None

@@ -58,13 +58,13 @@ class ReportBuilder(ABC):
         self._n_total += 1
         self._n_error += 1
 
-    def add_result(self, target, prediction):
+    def add_result(self, target: int, prediction: int | None):
         """Adds a single result to the report.
         """
         self._n_total += 1
 
-        if target is None:
-            raise RuntimeError("The target cannot be None.")
+        if pd.isna(target):
+            raise RuntimeError("The target cannot be None (or NaN).")
 
         if prediction is None:
             self._n_undefined_prediction += 1
