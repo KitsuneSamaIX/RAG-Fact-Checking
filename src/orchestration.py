@@ -25,39 +25,6 @@ def run_orchestrator():
     #
     # Note:
     #  - make sure the varying configuration parameters are included in the report
-    # for llm_name in ['mistral-nemo:12b-instruct-2407-fp16', 'llama3.1:8b-instruct-fp16']:
-    #     # Update config params
-    #     config.LLM_NAME = llm_name
-    #     for dataset_name in ['cikm2024_debona', 'cikm2024_soprano', 'climate_fever', 'feverous']:
-    #         # Update config params
-    #         config.DATASET_NAME = dataset_name
-    #         if dataset_name == 'climate_fever':  # Missing '.pqt' file for this dataset, so we use '.csv' instead
-    #             config.GROUND_TRUTH_DATASET_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'ground_truth.csv')
-    #         else:
-    #             config.GROUND_TRUTH_DATASET_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'ground_truth.pqt')
-    #         config.ALL_EVIDENCE_VECTOR_STORE_PATH = os.path.join(config.DATASET_PATH_PREFIX, config.DATASET_NAME, 'embeddings/512/')
-    #         for levels in [2, 6]:
-    #             if (levels == 6) and (dataset_name in ['climate_fever', 'feverous']):
-    #                 continue  # These datasets do not support the 6 classification levels
-    #             # Update config params
-    #             config.CLASSIFICATION_LEVELS = levels
-    #             for fill, invert in [(True, False), (False, True), (False, False)]:
-    #                 # Update config params
-    #                 config.FILL_EVIDENCE = fill
-    #                 config.FILL_EVIDENCE_UPPER_LIMIT = 10
-    #                 config.INVERT_EVIDENCE = invert
-    #                 for i in range(1, 11):
-    #                     # Update config params
-    #                     config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
-    #
-    #                     # Run test suite
-    #                     report, raw = run_test()
-    #                     reports.append(report)
-    #                     raw_data.append(raw)
-
-    # Run mini test to see if everything works
-    config.USE_SAMPLE = True
-    config.SAMPLE_SIZE = 3
     for llm_name in ['mistral-nemo:12b-instruct-2407-fp16', 'llama3.1:8b-instruct-fp16']:
         # Update config params
         config.LLM_NAME = llm_name
@@ -74,12 +41,12 @@ def run_orchestrator():
                     continue  # These datasets do not support the 6 classification levels
                 # Update config params
                 config.CLASSIFICATION_LEVELS = levels
-                for fill, invert in [(True, False)]:
+                for fill, invert in [(True, False), (False, True), (False, False)]:
                     # Update config params
                     config.FILL_EVIDENCE = fill
                     config.FILL_EVIDENCE_UPPER_LIMIT = 10
                     config.INVERT_EVIDENCE = invert
-                    for i in [1]:
+                    for i in range(1, 11):
                         # Update config params
                         config.TRUNCATED_RANKING_RETRIEVER_RESULTS = i
 
