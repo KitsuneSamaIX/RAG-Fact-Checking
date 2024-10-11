@@ -31,6 +31,7 @@ class _Common:
     # LLM
     LLM_TEMPERATURE = 0.1
     LLM_MAX_TOKENS = 100
+    LLM_CONTEXT_LENGTH = 4096
 
     # Classification levels
     #   2 -> use True/False.
@@ -249,6 +250,7 @@ class _Common:
         lines.append(f" - Embeddings (model): {cls.get_embeddings()}")
         lines.append(f" - LLM_TEMPERATURE: {cls.LLM_TEMPERATURE}")
         lines.append(f" - LLM_MAX_TOKENS: {cls.LLM_MAX_TOKENS}")
+        lines.append(f" - LLM_CONTEXT_LENGTH: {cls.LLM_CONTEXT_LENGTH}")
         lines.append(f" - CLASSIFICATION_LEVELS: {cls.CLASSIFICATION_LEVELS}")
         lines.append(f" - RETRIEVAL_MODE: {cls.RETRIEVAL_MODE}")
         lines.append(f" - VECTOR_STORE_SEARCH_TYPE: {cls.VECTOR_STORE_SEARCH_TYPE}")
@@ -291,7 +293,8 @@ class _Local(_Common):
         return ChatOllama(
             model='llama3.2',
             temperature=cls.LLM_TEMPERATURE,
-            num_predict=cls.LLM_MAX_TOKENS
+            num_predict=cls.LLM_MAX_TOKENS,
+            num_ctx=cls.LLM_CONTEXT_LENGTH
         )
 
     @classmethod
@@ -352,7 +355,8 @@ class _UniudMitel3Server(_Common):
         return ChatOllama(
             model=cls.LLM_NAME,
             temperature=cls.LLM_TEMPERATURE,
-            num_predict=cls.LLM_MAX_TOKENS
+            num_predict=cls.LLM_MAX_TOKENS,
+            num_ctx=cls.LLM_CONTEXT_LENGTH
         )
 
     @classmethod

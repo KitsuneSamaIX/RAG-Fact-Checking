@@ -13,6 +13,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
+from langchain_core.messages import BaseMessage
 
 from retrieval import create_vector_store_from_urls, create_retriever_from_vector_store
 from common import Fact
@@ -69,6 +70,7 @@ class RAGFactChecker:
         }
 
         # Main chain
+        self._check_exceeded_context_length(get_fact_checking_prompt_template().invoke(input_data).to_messages())
         rag_chain = (
             get_fact_checking_prompt_template()
             | config.get_llm()
@@ -110,6 +112,7 @@ class RAGFactChecker:
             retry_prompt.append(("ai", response))
             retry_prompt.append(("human", get_retry_msg()))
 
+            self._check_exceeded_context_length(retry_prompt.invoke(input_data).to_messages())
             rag_chain = (
                 retry_prompt
                 | config.get_llm()
@@ -175,3 +178,13 @@ class RAGFactChecker:
                 return res
 
         return None
+
+    @staticmethod
+    def _check_exceeded_context_length(messages: list[BaseMessage]):
+        """Checks if the number of tokens needed to encode all messages exceeds the model's context length.
+
+        Raises a RuntimeError if it exceeds.
+        """
+        n_tokens = config.get_llm().get_num_tokens_from_messages(messages)
+        if n_tokens > config.LLM_CONTEXT_LENGTH:
+            raise RuntimeError(f"The number of tokens needed to encode all messages ({n_tokens}) exceeds the model's context length ({config.LLM_CONTEXT_LENGTH}).")
