@@ -32,6 +32,11 @@ def load_ground_truth_dataset() -> pd.DataFrame:
     if 'date' not in df.columns:
         df['date'] = None
 
+    # WORKAROUND: the target of the dataset 'climate_fever' is inverted so we fix it here
+    if hasattr(config, 'DATASET_NAME') and config.DATASET_NAME == 'climate_fever':
+        df['target'] = 1 - df['target']
+        df['binary_target'] = 1 - df['binary_target']
+
     if config.USE_SAMPLE:
         df = df.sample(config.SAMPLE_SIZE)
 
