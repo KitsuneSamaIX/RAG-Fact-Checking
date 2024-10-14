@@ -41,7 +41,8 @@ def run_orchestrator():
                     continue  # These datasets do not support the 6 classification levels
                 # Update config params
                 config.CLASSIFICATION_LEVELS = levels
-                for fill, invert in [(True, False), (False, True), (False, False)]:
+                # for fill, invert in [(True, False), (False, True), (False, False)]:
+                for fill, invert in [(True, True)]:
                     # Update config params
                     config.FILL_EVIDENCE = fill
                     config.FILL_EVIDENCE_UPPER_LIMIT = 10
